@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -75,13 +76,11 @@ namespace Project_DICOM
         public MainWindow()
         {
             InitializeComponent();
-            LoadFiles();
-            DrawImages();
         }
 
         public void LoadFiles()
         {
-            bytes = File.ReadAllBytes(filename);
+            //bytes = File.ReadAllBytes(filename);
             bool found = false;
             uint i;
 
@@ -431,9 +430,27 @@ namespace Project_DICOM
             DrawImage3();
         }
 
-        private void PickFolder(object sender, RoutedEventArgs e)
+        private void OnPickFolder(object sender, RoutedEventArgs e)
         {
-   
+            string directory = "";
+            var fbd = new FolderBrowserDialog();
+            byte[] fileBytes = null;
+            fbd.SelectedPath = @"D:\infa_studia\10semestr\WZI\sikor\Wybrane_zastosowania_informatyki\";
+            DialogResult result = fbd.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+            {
+                directory = fbd.SelectedPath;
+            }
+
+            foreach (string file in Directory.EnumerateFiles(directory))
+            {
+                fileBytes = File.ReadAllBytes(file);
+            }
+            bytes = fileBytes;
+            LoadFiles();
+            DrawImages();
+
         }
 
         public void ClearBitMaps()

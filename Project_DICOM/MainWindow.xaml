@@ -6,15 +6,15 @@
         xmlns:local="clr-namespace:Project_DICOM"
         mc:Ignorable="d"
         Title="MainWindow" Height="724.598" Width="1568.075">
-    <Grid Margin="0,0,3.8,2.8">
-        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="712,615,0,0" VerticalAlignment="Top" Width="159" Height="44" Click="PickFolder"/>
-        <Border Margin="5,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="DarkBlue" VerticalAlignment="Top" HorizontalAlignment="Left">
+    <Grid Margin="0,0,3.8,2.8" Background="LightSlateGray">
+        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="712,615,0,0" VerticalAlignment="Top" Width="159" Height="44" Click="OnPickFolder" Background="GreenYellow"/>
+        <Border Margin="5,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
         </Border>
-        <Border Margin="520,5,0,0" Width="512" BorderThickness="1" BorderBrush="DarkBlue" Height="512" VerticalAlignment="Top" HorizontalAlignment="Left">
+        <Border Margin="520,5,0,0" Width="512" BorderThickness="1" BorderBrush="Black" Height="512" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Image x:Name="Image2" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
         </Border>
-        <Border Margin="1034,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="DarkBlue" VerticalAlignment="Top" HorizontalAlignment="Left">
+        <Border Margin="1034,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Image x:Name="Image3" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
         </Border>
         <Slider x:Name="slider1" HorizontalAlignment="Left" Margin="5,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide1"/>
