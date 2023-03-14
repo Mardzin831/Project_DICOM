@@ -5,14 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Project_DICOM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="661.501" Width="1566.039">
+        Title="MainWindow" Height="724.598" Width="1568.075">
     <Grid Margin="0,0,3.8,2.8">
-        <Button Content="Button" HorizontalAlignment="Left" Margin="756,577,0,0" VerticalAlignment="Top" Width="171" Height="33" Click="Button_Click"/>
-        <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512" Margin="4,10,0,0"/>
-        <Image x:Name="Image1_Copy" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512" Margin="522,10,0,0"/>
-        <Image x:Name="Image1_Copy1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512" Margin="1039,10,0,0"/>
-
-
-
+        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="712,615,0,0" VerticalAlignment="Top" Width="159" Height="44" Click="PickFolder"/>
+        <Border Margin="5,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="DarkBlue" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
+        </Border>
+        <Border Margin="520,5,0,0" Width="512" BorderThickness="1" BorderBrush="DarkBlue" Height="512" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Image x:Name="Image2" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
+        </Border>
+        <Border Margin="1034,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="DarkBlue" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Image x:Name="Image3" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
+        </Border>
+        <Slider x:Name="slider1" HorizontalAlignment="Left" Margin="5,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide1" Value="1"/>
+        <Slider x:Name="slider2" HorizontalAlignment="Left" Margin="520,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide2" Value="1"/>
+        <Slider x:Name="slider3" HorizontalAlignment="Left" Margin="1034,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide3" Value="1"/>
     </Grid>
 </Window>

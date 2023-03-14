@@ -22,6 +22,14 @@ namespace Project_DICOM
     {
         string filename = @"D:\infa_studia\10semestr\WZI\sikor\Wybrane_zastosowania_informatyki\head-dicom\IM2";
         byte[] bytes;
+        byte[] bitMap1;
+        byte[] bitMap2;
+        byte[] bitMap3;
+        byte[][][]pixels;
+        string type = "";
+        int width = 512, height = 512;
+        int countFiles = 1;
+
         List<string> specialTags = new List<string>() { "OB", "OW", "OF", "SQ", "UT", "UN" };
         NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat;
 
@@ -68,7 +76,8 @@ namespace Project_DICOM
         {
             InitializeComponent();
             Load_Files();
-            DrawImage1(1000, 1000);
+            ClearBitMaps();
+            DrawImages();
         }
 
         public void Load_Files()
@@ -76,6 +85,7 @@ namespace Project_DICOM
             bytes = File.ReadAllBytes(filename);
             bool found = false;
             uint i;
+
             // Search for DICM
             for (i = 0; i + 3 < bytes.Length; i += 4)
             {
@@ -119,30 +129,30 @@ namespace Project_DICOM
                 skip += 2 + count;
                
                 // (0028, 0010) Rows
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x0010)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x0010) 
                 {
                     rows = (ushort) ((bytes[i + skip - count + 1] << 8) + (bytes[i + skip - count]));
                 }
 
                 // (0028, 0011) Columns
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x0011)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x0011) 
                 {
                     cols = (ushort) ((bytes[i + skip - count + 1] << 8) + (bytes[i + skip - count]));
                 }
 
                 // (0028, 0101) Bits Stored
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x0101)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x0101) 
                 {
                     bitsStored = (ushort) ((bytes[i + skip - count + 1] << 8) + (bytes[i + skip - count]));
                 }
 
                 // (0028, 0100) Bits Allocated
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x0100)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x0100) 
                 {
                     bitsAllocated = (ushort) ((bytes[i + skip - count + 1] << 8) + (bytes[i + skip - count]));
                 }
                 // (0028, 1053) Rescale Slope
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x1053)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x1053) 
                 {
                     string buffer = checkPattern(i + skip - count, i + skip);
                     var parts = buffer.Split('\\');
@@ -152,7 +162,7 @@ namespace Project_DICOM
                 }
                 
                 // (0028, 1052) Rescale Intercept
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x1052)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x1052) 
                 {
                     string buffer = checkPattern(i + skip - count, i + skip);
                     var parts = buffer.Split('\\');
@@ -162,7 +172,7 @@ namespace Project_DICOM
                 }
                 
                 // (0028, 0030) Pixel Spacing [2]
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x0030)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x0030) 
                 {
                     string buffer = checkPattern(i + skip - count, i + skip);
                     var parts = buffer.Split('\\');
@@ -174,7 +184,7 @@ namespace Project_DICOM
                 }
 
                 //(0018, 0050) Slice Thickness
-                if (tagGroup == (ushort)(0x0018) && tagNumber == (ushort)(0x0050))
+                if (tagGroup == 0x0018 && tagNumber == 0x0050)
                 {
                     string buffer = checkPattern(i + skip - count, i + skip);
                     var parts = buffer.Split('\\');
@@ -184,7 +194,7 @@ namespace Project_DICOM
                 }
                 
                 // (0020, 0032) Image Position (Patient) [3]
-                if (tagGroup == (ushort) (0x0020) && tagNumber == (ushort) (0x0032)) 
+                if (tagGroup == 0x0020 && tagNumber == 0x0032) 
                 {
                     string buffer = checkPattern(i + skip - count, i + skip);
                     var parts = buffer.Split('\\');
@@ -199,7 +209,7 @@ namespace Project_DICOM
                 }
 
                 // (0028, 1050) Window Center
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x1050)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x1050) 
                 {
                     string buffer = checkPattern(i + skip - count, i + skip);
                     var parts = buffer.Split('\\');
@@ -209,7 +219,7 @@ namespace Project_DICOM
                 }
 
                 // (0028, 1051) Window Width
-                if (tagGroup == (ushort) (0x0028) && tagNumber == (ushort) (0x1051)) 
+                if (tagGroup == 0x0028 && tagNumber == 0x1051) 
                 {
                     string buffer = checkPattern(i + skip - count, i + skip);
                     var parts = buffer.Split('\\');
@@ -219,7 +229,7 @@ namespace Project_DICOM
                 }
 
                 // (0020, 1041) Slice Location
-                if (tagGroup == (ushort) (0x0020) && tagNumber == (ushort) (0x1041)) 
+                if (tagGroup == 0x0020 && tagNumber == 0x1041) 
                 {
                     string buffer = checkPattern(i + skip - count, i + skip);
                     var parts = buffer.Split('\\');
@@ -229,13 +239,33 @@ namespace Project_DICOM
                 }
 
                 // (7fe0, 0010) Pixel Data
-                if (tagGroup == (ushort) (0x7fe0) && tagNumber == (ushort) (0x0010)) 
+                if (tagGroup == 0x7fe0 && tagNumber == 0x0010) 
                 {
-                    i += (skip - count);
+                    i += skip - count;
                     break;
                 }
-
             }
+
+            // Read Pixels
+            pixelData = new int[rows][];
+            for (uint k = 0; k < rows; k++)
+            {
+                pixelData[k] = new int[cols];
+            }
+            uint row = 0, col = 0;
+            for (; i < bytes.Length; i += 2)
+            {
+                pixelData[row][col] = ((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i]);
+                col++;
+                if (col == cols)
+                {
+                    col = 0;
+                    row++;
+                }
+            }
+            slider1.Maximum = countFiles - 1;
+            slider2.Maximum = rows - 1;
+            slider3.Maximum = cols - 1;
         }
 
         public string checkPattern(uint start, uint end)
@@ -253,7 +283,7 @@ namespace Project_DICOM
 
         public byte getColor(int x, int y, string type)
         {
-            float value = (float)pixelData[x][y] * rescaleSlope + rescaleIntercept;
+            float value = pixelData[x][y] * rescaleSlope + rescaleIntercept;
             byte yMin = 0;
             byte yMax = 255;
             float center = windowCenter - 0.5f;
@@ -291,16 +321,126 @@ namespace Project_DICOM
             }
         }
 
-        public void DrawImage1(int x, int y)
+        public void DrawImage1()
         {
-            var rp = new byte[4 * x * y];
-            new Random().NextBytes(rp);
-            BitmapSource bs = BitmapSource.Create(x, y, 96d, 96d, PixelFormats.Bgra32, null, rp, x * 4);
+            FillPixels();
+            PixelFormat pf = PixelFormats.Bgr32;
+            int stride = (width * pf.BitsPerPixel + 7) / 8;
+            bitMap1 = new byte[stride * height];
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    SetBitMap(bitMap1, i, j, pixels[(int)slider1.Value][i][j]);
+                }
+            }
+
+            BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap1, stride);
+            //var bitmap = new TransformedBitmap(bs, 
+            //    new ScaleTransform(1, 1));
             Image1.Source = bs;
         }
-        private void Button_Click(object sender, RoutedEventArgs e)
+        public void DrawImage2()
         {
+            Debug.WriteLine(slider2.Value);
+            FillPixels();
+            PixelFormat pf = PixelFormats.Bgr32;
+            int stride = (width * pf.BitsPerPixel + 7) / 8;
+            bitMap2 = new byte[stride * height];
+            for (int i = 0; i < countFiles; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    SetBitMap(bitMap2, countFiles - 1 - i, j, pixels[i][(int)slider2.Value][j]);
+                }
+            }
+            BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap2, stride);
+            CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
+            var bitmap = new TransformedBitmap(croppedBitmap, 
+                new ScaleTransform(1, countFiles * sliceThickness / pixelSpacing[0]));
+            Image2.Source = bitmap;
+            Debug.WriteLine(slider2.Value);
+        }
+        public void DrawImage3()
+        {
+            FillPixels();
+            PixelFormat pf = PixelFormats.Bgr32;
+            int stride = (width * pf.BitsPerPixel + 7) / 8;
+            bitMap3 = new byte[stride * height];
+            for (int i = 0; i < countFiles; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    SetBitMap(bitMap3, countFiles - 1 - i, j, pixels[i][j][(int)slider3.Value]);
+                }
+            }
 
+            BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap3, stride);
+            CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
+            var bitmap = new TransformedBitmap(croppedBitmap,
+                new ScaleTransform(1, countFiles * sliceThickness / pixelSpacing[1]));
+            Image3.Source = bitmap;
+        }
+        public void DrawImages()
+        {
+            DrawImage1();
+            DrawImage2();
+            DrawImage3();
+        }
+        public void FillPixels()
+        {
+            pixels = new byte[1][][];
+            for (int i = 0; i <= 0; i++) //na razie dla 1 obrazka
+            {
+                pixels[i] = new byte[rows][];
+                for (int j = 0; j < rows; j++)
+                {
+                    pixels[i][j] = new byte[cols];
+                    for (int k = 0; k < rows; k++)
+                    {
+                        pixels[i][j][k] = getColor(j, k, type);
+                    }
+                }
+            }
+        }
+        public void SetBitMap(byte[] bitMap, int x, int y, byte color)
+        {
+            bitMap[512 * 4 * x + 4 * y] = color;
+            bitMap[512 * 4 * x + 4 * y + 1] = color;
+            bitMap[512 * 4 * x + 4 * y + 2] = color;
+        }
+
+        private void OnSlide1(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            DrawImage1();
+        }
+
+        private void OnSlide2(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            DrawImage2();
+        }
+
+        private void OnSlide3(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            DrawImage3();
+        }
+
+        private void PickFolder(object sender, RoutedEventArgs e)
+        {
+   
+        }
+
+        public void ClearBitMaps()
+        {
+            for (int i = 0; i < 512; i++)
+            {
+                for (int j = 0; j < 512; j++)
+                {
+                    SetBitMap(bitMap1, i, j, 0);
+                    SetBitMap(bitMap2, i, j, 0);
+                    SetBitMap(bitMap3, i, j, 0);
+                }
+            }
         }
     }
 }
