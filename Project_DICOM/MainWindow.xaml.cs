@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
@@ -17,7 +18,6 @@ namespace Project_DICOM
         byte[] bitMap2;
         byte[] bitMap3;
         byte[][][]pixels;
-        string type = "";
         int width = 512, height = 512;
         int countFiles = 0;
 
@@ -70,12 +70,13 @@ namespace Project_DICOM
                     SetBitMap(bitMap2, countFiles - 1 - i, j, pixels[i][(int)slider2.Value][j]);
                 }
             }
-            BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap2, stride);
+            BitmapSource bs = BitmapSource.Create(width, countFiles, 96d, 96d, pf, null, bitMap2, stride);
             RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.NearestNeighbor);
             CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
             var bitmap = new TransformedBitmap(croppedBitmap, 
-                new ScaleTransform(1, (int)(countFiles * dicoms[0].sliceThickness / dicoms[0].pixelSpacing[0]) / countFiles));
+                new ScaleTransform(1, dicoms[0].spacingBetweenSlices));
             Image2.Source = bitmap;
+
         }
         public void DrawImage3()
         {
@@ -115,7 +116,7 @@ namespace Project_DICOM
                     pixels[i][j] = new byte[dicoms[0].cols];
                     for (int k = 0; k < dicoms[0].rows; k++)
                     {
-                        pixels[i][j][k] = dicoms[i].GetColor(j, k, type);
+                        pixels[i][j][k] = dicoms[i].GetColor(j, k);
                     }
                 }
             }
@@ -156,21 +157,30 @@ namespace Project_DICOM
             string directory = "";
             var fbd = new FolderBrowserDialog();
             byte[] fileBytes;
-            fbd.SelectedPath = @"D:\infa_studia\10semestr\WZI\sikor\Wybrane_zastosowania_informatyki\";
+            fbd.SelectedPath = @"D:\infa_studia\10semestr\WZI\head-dicom\";
             DialogResult result = fbd.ShowDialog();
 
             if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
             {
                 directory = fbd.SelectedPath;
             }
+            else
+            {
+                return;
+            }
+
+            IEnumerable<string> files = Directory.EnumerateFiles(directory).OrderBy(f => f);
 
             foreach (string file in Directory.EnumerateFiles(directory))
             {
                 fileBytes = File.ReadAllBytes(file);
-                dicoms.Add(new Dicom());
+                Dicom dicom = new Dicom();
+                dicom.name = file;
+                dicoms.Add(dicom);
                 dicoms[countFiles].LoadFile(fileBytes);
                 countFiles += 1;
             }
+            
             DrawImages();
             SetSliders();
         }

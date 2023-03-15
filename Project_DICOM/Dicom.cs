@@ -11,6 +11,7 @@ namespace Project_DICOM
 
         List<string> specialTags = new List<string>() { "OB", "OW", "OF", "SQ", "UT", "UN" };
         NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat;
+        public string name; 
 
         // (7fe0, 0010) Pixel Data
         public int[][] pixelData;
@@ -36,8 +37,11 @@ namespace Project_DICOM
         // (0028, 0030) Pixel Spacing [2]
         public float[] pixelSpacing = new float[2];
 
-        //(0018, 0050) Slice Thickness
+        // (0018, 0050) Slice Thickness
         public float sliceThickness;
+
+        // (0018,0088) Spacing Between Slices
+        public float spacingBetweenSlices;
 
         // (0020, 0032) Image Position (Patient) [3]
         public float[] imagePosition = new float[3];
@@ -100,25 +104,25 @@ namespace Project_DICOM
                 // (0028, 0010) Rows
                 if (tagGroup == 0x0028 && tagNumber == 0x0010)
                 {
-                    rows = (ushort)((bytes[i + skip - count + 1] << 8) + (bytes[i + skip - count]));
+                    rows = (ushort)((bytes[i + skip - count + 1] << 8) + bytes[i + skip - count]);
                 }
 
                 // (0028, 0011) Columns
                 if (tagGroup == 0x0028 && tagNumber == 0x0011)
                 {
-                    cols = (ushort)((bytes[i + skip - count + 1] << 8) + (bytes[i + skip - count]));
+                    cols = (ushort)((bytes[i + skip - count + 1] << 8) + bytes[i + skip - count]);
                 }
 
                 // (0028, 0101) Bits Stored
                 if (tagGroup == 0x0028 && tagNumber == 0x0101)
                 {
-                    bitsStored = (ushort)((bytes[i + skip - count + 1] << 8) + (bytes[i + skip - count]));
+                    bitsStored = (ushort)((bytes[i + skip - count + 1] << 8) + bytes[i + skip - count]);
                 }
 
                 // (0028, 0100) Bits Allocated
                 if (tagGroup == 0x0028 && tagNumber == 0x0100)
                 {
-                    bitsAllocated = (ushort)((bytes[i + skip - count + 1] << 8) + (bytes[i + skip - count]));
+                    bitsAllocated = (ushort)((bytes[i + skip - count + 1] << 8) + bytes[i + skip - count]);
                 }
                 // (0028, 1053) Rescale Slope
                 if (tagGroup == 0x0028 && tagNumber == 0x1053)
@@ -159,6 +163,15 @@ namespace Project_DICOM
                     float a = float.Parse(buffer, nfi);
 
                     sliceThickness = a;
+                }
+
+                // (0018,0088) Spacing Between Slices
+                if (tagGroup == 0x0018 && tagNumber == 0x0088)
+                {
+                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    float a = float.Parse(buffer, nfi);
+                    Debug.WriteLine(a);
+                    spacingBetweenSlices = a;
                 }
 
                 // (0020, 0032) Image Position (Patient) [3]
@@ -232,31 +245,13 @@ namespace Project_DICOM
                 }
             }
         }
-        public byte GetColor(int x, int y, string type)
+        public byte GetColor(int x, int y)
         {
             float value = pixelData[x][y] * rescaleSlope + rescaleIntercept;
             byte yMin = 0;
             byte yMax = 255;
             float center = windowCenter - 0.5f;
             float width = windowWidth - 1.0f;
-            if (type == "bone")
-            {
-                // 300-400 i 500-1900
-                center = 300 - 0.5f;
-                width = 1900 - 1.0f;
-            }
-            if (type == "brain")
-            {
-                // 40-80
-                center = 40 - 0.5f;
-                width = 80 - 1.0f;
-            }
-            if (type == "angio")
-            {
-                // 300-600
-                center = 300 - 0.5f;
-                width = 600 - 1.0f;
-            }
 
             if (value <= (center - width / 2.0f))
             {
