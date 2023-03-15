@@ -9,50 +9,50 @@ namespace Project_DICOM
     {
         public Dicom() { }
 
-        List<string> specialTags = new List<string>() { "OB", "OW", "OF", "SQ", "UT", "UN" };
+        List<string> specialTags = new List<string>() { "OB", "OW", "SQ" };
         NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat;
-        public string name; 
+        public int id; 
 
-        // (7fe0, 0010) Pixel Data
+        // (7fe0,0010) Pixel Data
         public int[][] pixelData;
 
-        // (0028, 0010) Rows
+        // (0028,0010) Rows
         public ushort rows;
 
-        // (0028, 0011) Columns
+        // (0028,0011) Columns
         public ushort cols;
 
-        // (0028, 0101) Bits Stored
+        // (0028,0101) Bits Stored
         public ushort bitsStored;
 
-        // (0028, 0100) Bits Allocated
+        // (0028,0100) Bits Allocated
         public ushort bitsAllocated;
 
-        // (0028, 1053) Rescale Slope
+        // (0028,1053) Rescale Slope
         public float rescaleSlope;
 
-        // (0028, 1052) Rescale Intercept
+        // (0028,1052) Rescale Intercept
         public float rescaleIntercept;
 
-        // (0028, 0030) Pixel Spacing [2]
+        // (0028,0030) Pixel Spacing [2]
         public float[] pixelSpacing = new float[2];
 
-        // (0018, 0050) Slice Thickness
+        // (0018,0050) Slice Thickness
         public float sliceThickness;
 
         // (0018,0088) Spacing Between Slices
         public float spacingBetweenSlices;
 
-        // (0020, 0032) Image Position (Patient) [3]
+        // (0020,0032) Image Position (Patient) [3]
         public float[] imagePosition = new float[3];
 
-        // (0028, 1050) Window Center
+        // (0028,1050) Window Center
         public float windowCenter;
 
-        // (0028, 1051) Window Width
+        // (0028,1051) Window Width
         public float windowWidth;
 
-        // (0020, 1041) Slice Location
+        // (0020,1041) Slice Location
         public float sliceLocation;
 
         public void LoadFile(byte[] bytes)
@@ -74,7 +74,7 @@ namespace Project_DICOM
                 Debug.WriteLine("DICM not found");
                 return;
             }
-
+            
             uint skip = 0;
             uint count = 0;
             ushort tagGroup;
@@ -165,12 +165,12 @@ namespace Project_DICOM
                     sliceThickness = a;
                 }
 
-                // (0018,0088) Spacing Between Slices
+                // (0018, 0088) Spacing Between Slices
                 if (tagGroup == 0x0018 && tagNumber == 0x0088)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
                     float a = float.Parse(buffer, nfi);
-                    Debug.WriteLine(a);
+
                     spacingBetweenSlices = a;
                 }
 
@@ -247,11 +247,11 @@ namespace Project_DICOM
         }
         public byte GetColor(int x, int y)
         {
-            float value = pixelData[x][y] * rescaleSlope + rescaleIntercept;
             byte yMin = 0;
             byte yMax = 255;
             float center = windowCenter - 0.5f;
             float width = windowWidth - 1.0f;
+            float value = pixelData[x][y] * rescaleSlope + rescaleIntercept;
 
             if (value <= (center - width / 2.0f))
             {
@@ -268,7 +268,7 @@ namespace Project_DICOM
         }
         public string CheckPattern(byte[] bytes, uint start, uint end)
         {
-            char[] buffer = new char[(ulong)(end - start + 1)];
+            char[] buffer = new char[end - start + 1];
             int i = 0;
             for (; bytes[start] != bytes[end]; start++)
             {

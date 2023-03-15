@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
@@ -13,7 +14,7 @@ namespace Project_DICOM
 {
     public partial class MainWindow : Window
     {
-        List<Dicom> dicoms = new List<Dicom>();
+        Dicom[] dicoms;
         byte[] bitMap1;
         byte[] bitMap2;
         byte[] bitMap3;
@@ -52,7 +53,7 @@ namespace Project_DICOM
             }
 
             BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap1, stride);
-            RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.HighQuality);
             //var bitmap = new TransformedBitmap(bs, 
             //    new ScaleTransform(1, 1));
             Image1.Source = bs;
@@ -71,10 +72,11 @@ namespace Project_DICOM
                 }
             }
             BitmapSource bs = BitmapSource.Create(width, countFiles, 96d, 96d, pf, null, bitMap2, stride);
-            RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.NearestNeighbor);
+            //RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.NearestNeighbor);
             CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
             var bitmap = new TransformedBitmap(croppedBitmap, 
-                new ScaleTransform(1, dicoms[0].spacingBetweenSlices));
+                new ScaleTransform(1, 512.0 / countFiles));
+            RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
             Image2.Source = bitmap;
 
         }
@@ -93,10 +95,11 @@ namespace Project_DICOM
             }
 
             BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap3, stride);
-            RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.NearestNeighbor);
+            
             CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
             var bitmap = new TransformedBitmap(croppedBitmap,
-                new ScaleTransform(1, dicoms[0].sliceThickness / dicoms[0].pixelSpacing[1]));
+                new ScaleTransform(1, 512.0 / countFiles));
+            RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
             Image3.Source = bitmap;
         }
         public void DrawImages()
@@ -169,14 +172,20 @@ namespace Project_DICOM
                 return;
             }
 
-            IEnumerable<string> files = Directory.EnumerateFiles(directory).OrderBy(f => f);
+            IEnumerable<string> files = Directory.EnumerateFiles(directory);
+            List<string> lf = new List<string>(files);
+            lf.Sort((s1, s2) => Int32.Parse(Regex.Match(s1, @"(\d+)(?!.*\d)").Value).
+                CompareTo(Int32.Parse(Regex.Match(s2, @"(\d+)(?!.*\d)").Value)));
 
-            foreach (string file in Directory.EnumerateFiles(directory))
+            countFiles = 0;
+            dicoms = new Dicom[files.Count()];
+
+            foreach (string file in lf)
             {
                 fileBytes = File.ReadAllBytes(file);
                 Dicom dicom = new Dicom();
-                dicom.name = file;
-                dicoms.Add(dicom);
+                
+                dicoms[countFiles] = dicom;
                 dicoms[countFiles].LoadFile(fileBytes);
                 countFiles += 1;
             }
