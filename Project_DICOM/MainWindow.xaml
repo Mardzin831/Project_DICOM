@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Project_DICOM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="724.598" Width="1568.075">
-    <Grid Margin="0,0,3.8,2.8" Background="LightSlateGray">
-        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="712,615,0,0" VerticalAlignment="Top" Width="159" Height="44" Click="OnPickFolder" Background="GreenYellow"/>
+        Title="MainWindow" Height="800" Width="1570">
+    <Grid Margin="1" Background="LightSlateGray">
+        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="699,595,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
         <Border Margin="5,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
         </Border>
@@ -17,8 +17,32 @@
         <Border Margin="1034,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Image x:Name="Image3" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
         </Border>
-        <Slider x:Name="slider1" HorizontalAlignment="Left" Margin="5,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide1" IsSnapToTickEnabled="True" TickFrequency="1"/>
-        <Slider x:Name="slider2" HorizontalAlignment="Left" Margin="520,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide2" IsSnapToTickEnabled="True" TickFrequency="1"/>
-        <Slider x:Name="slider3" HorizontalAlignment="Left" Margin="1034,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide3" IsSnapToTickEnabled="True" TickFrequency="1"/>
+        <Slider x:Name="slider1" HorizontalAlignment="Left" Margin="5,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide1" IsSnapToTickEnabled="True" TickFrequency="1">
+            <Slider.LayoutTransform>
+                <ScaleTransform ScaleY="2"/>
+            </Slider.LayoutTransform>
+        </Slider>
+        <Slider x:Name="slider2" HorizontalAlignment="Left" Margin="520,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide2" IsSnapToTickEnabled="True" TickFrequency="1">
+            <Slider.LayoutTransform>
+                <ScaleTransform ScaleY="2"/>
+            </Slider.LayoutTransform>
+        </Slider>
+        <Slider x:Name="slider3" HorizontalAlignment="Left" Margin="1034,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide3" IsSnapToTickEnabled="True" TickFrequency="1">
+            <Slider.LayoutTransform>
+                <ScaleTransform ScaleY="2"/>
+            </Slider.LayoutTransform>
+        </Slider>
+        <Slider x:Name="sliderLevel" HorizontalAlignment="Left" Margin="65,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideLevel" IsSnapToTickEnabled="True" TickFrequency="1">
+            <Slider.LayoutTransform>
+                <ScaleTransform ScaleY="2.5"/>
+            </Slider.LayoutTransform>
+        </Slider>
+        <Slider x:Name="sliderWidth" HorizontalAlignment="Left" Margin="977,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideWidth" IsSnapToTickEnabled="True" TickFrequency="1">
+            <Slider.LayoutTransform>
+                <ScaleTransform ScaleY="2.5"/>
+            </Slider.LayoutTransform>
+        </Slider>
+        <Label Content="Window Level (Center) - Jasność" HorizontalAlignment="Left" Margin="166,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
+        <Label Content="Window Width (Range) - Kontrast" HorizontalAlignment="Left" Margin="1078,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
     </Grid>
 </Window>

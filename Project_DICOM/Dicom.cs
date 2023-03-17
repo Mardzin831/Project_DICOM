@@ -17,16 +17,16 @@ namespace Project_DICOM
         public int[][] pixelData;
 
         // (0028,0010) Rows
-        public ushort rows;
+        public int rows;
 
         // (0028,0011) Columns
-        public ushort cols;
+        public int cols;
 
         // (0028,0101) Bits Stored
-        public ushort bitsStored;
+        public int bitsStored;
 
         // (0028,0100) Bits Allocated
-        public ushort bitsAllocated;
+        public int bitsAllocated;
 
         // (0028,1053) Rescale Slope
         public float rescaleSlope;
@@ -58,7 +58,7 @@ namespace Project_DICOM
         public void LoadFile(byte[] bytes)
         {
             bool found = false;
-            uint i;
+            int i;
 
             // Search for DICM
             for (i = 0; i + 3 < bytes.Length; i += 4)
@@ -74,17 +74,17 @@ namespace Project_DICOM
                 Debug.WriteLine("DICM not found");
                 return;
             }
-            
-            uint skip = 0;
-            uint count = 0;
-            ushort tagGroup;
-            ushort tagNumber;
+
+            int skip = 0;
+            int count = 0;
+            int tagGroup;
+            int tagNumber;
 
             for (i += 4; i < bytes.Length; i += skip)
             {
                 skip = 6;
-                tagGroup = (ushort)(((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i]));
-                tagNumber = (ushort)((bytes[i + 3] << 8) + bytes[i + 2]);
+                tagGroup = ((bytes[i + 1]) << 8) + bytes[i];
+                tagNumber = (bytes[i + 3] << 8) + bytes[i + 2];
 
                 string dataType = "";
                 dataType += (char)bytes[i + 4];
@@ -92,37 +92,37 @@ namespace Project_DICOM
 
                 if (specialTags.Contains(dataType))
                 {
-                    count = (uint)((bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8]);
+                    count = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
                     skip += 4;
                 }
                 else
                 {
-                    count = (uint)((bytes[i + 7] << 8) + bytes[i + 6]);
+                    count = (bytes[i + 7] << 8) + bytes[i + 6];
                 }
                 skip += 2 + count;
 
                 // (0028, 0010) Rows
                 if (tagGroup == 0x0028 && tagNumber == 0x0010)
                 {
-                    rows = (ushort)((bytes[i + skip - count + 1] << 8) + bytes[i + skip - count]);
+                    rows = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
                 }
 
                 // (0028, 0011) Columns
                 if (tagGroup == 0x0028 && tagNumber == 0x0011)
                 {
-                    cols = (ushort)((bytes[i + skip - count + 1] << 8) + bytes[i + skip - count]);
+                    cols = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
                 }
 
                 // (0028, 0101) Bits Stored
                 if (tagGroup == 0x0028 && tagNumber == 0x0101)
                 {
-                    bitsStored = (ushort)((bytes[i + skip - count + 1] << 8) + bytes[i + skip - count]);
+                    bitsStored = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
                 }
 
                 // (0028, 0100) Bits Allocated
                 if (tagGroup == 0x0028 && tagNumber == 0x0100)
                 {
-                    bitsAllocated = (ushort)((bytes[i + skip - count + 1] << 8) + bytes[i + skip - count]);
+                    bitsAllocated = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
                 }
                 // (0028, 1053) Rescale Slope
                 if (tagGroup == 0x0028 && tagNumber == 0x1053)
@@ -229,14 +229,14 @@ namespace Project_DICOM
 
             // Read Pixels
             pixelData = new int[rows][];
-            for (uint k = 0; k < rows; k++)
+            for (int k = 0; k < rows; k++)
             {
                 pixelData[k] = new int[cols];
             }
-            uint row = 0, col = 0;
+            int row = 0, col = 0;
             for (; i < bytes.Length; i += 2)
             {
-                pixelData[row][col] = ((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i]);
+                pixelData[row][col] = ((bytes[i + 1]) << 8) + bytes[i];
                 col++;
                 if (col == cols)
                 {
@@ -266,7 +266,7 @@ namespace Project_DICOM
                 return (byte)(((value - center) / width + 0.5f) * (yMax - yMin) + yMin);
             }
         }
-        public string CheckPattern(byte[] bytes, uint start, uint end)
+        public string CheckPattern(byte[] bytes, int start, int end)
         {
             char[] buffer = new char[end - start + 1];
             int i = 0;

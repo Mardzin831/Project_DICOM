@@ -155,6 +155,16 @@ namespace Project_DICOM
             }
         }
 
+        private void OnSlideLevel(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+        }
+
+        private void OnSlideWidth(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+        }
+
         private void OnPickFolder(object sender, RoutedEventArgs e)
         {
             string directory = "";
@@ -192,19 +202,6 @@ namespace Project_DICOM
             
             DrawImages();
             SetSliders();
-        }
-
-        public void ClearBitMaps()
-        {
-            for (int i = 0; i < 512; i++)
-            {
-                for (int j = 0; j < 512; j++)
-                {
-                    SetBitMap(bitMap1, i, j, 0);
-                    SetBitMap(bitMap2, i, j, 0);
-                    SetBitMap(bitMap3, i, j, 0);
-                }
-            }
         }
     }
 }
