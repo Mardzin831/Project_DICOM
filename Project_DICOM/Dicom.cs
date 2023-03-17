@@ -13,7 +13,7 @@ namespace Project_DICOM
         NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat; 
 
         // (7fe0,0010) Pixel Data
-        public int[][] pixelData;
+        public int[] pixelData;
 
         // (0028,0010) Rows
         public int rows;
@@ -228,16 +228,13 @@ namespace Project_DICOM
             }
 
             // Read Pixels
-            pixelData = new int[rows][];
-            for (int k = 0; k < rows; k++)
-            {
-                pixelData[k] = new int[cols];
-            }
+            pixelData = new int[rows * cols];
+
             int row = 0, col = 0;
-            for (; i < bytes.Length; i += 2)
+            for (; i < bytes.Length; i += 2, col++)
             {
-                pixelData[row][col] = ((bytes[i + 1]) << 8) + bytes[i];
-                col++;
+                pixelData[row * cols + col] = ((bytes[i + 1]) << 8) + bytes[i];
+ 
                 if (col == cols)
                 {
                     col = 0;
@@ -247,7 +244,7 @@ namespace Project_DICOM
         }
         public byte GetColor(int x, int y, int sliderL, int sliderW)
         {
-            float color = pixelData[x][y] * rescaleSlope + rescaleIntercept;
+            float color = pixelData[x * cols + y] * rescaleSlope + rescaleIntercept;
             float center = windowCenter - 0.5f + sliderL;
             float width = windowWidth - 1.0f + sliderW;
             byte min = 0;

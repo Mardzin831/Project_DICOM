@@ -19,7 +19,7 @@ namespace Project_DICOM
         byte[] bitMap1;
         byte[] bitMap2;
         byte[] bitMap3;
-        byte[][][]pixels;
+        byte[] pixels;
         int width = 512, height = 512;
         int countFiles = 0;
 
@@ -51,7 +51,7 @@ namespace Project_DICOM
             {
                 for (int j = 0; j < height; j++)
                 {
-                    SetBitMap(bitMap1, i, j, pixels[sliderValue][i][j]);
+                    SetBitMap(bitMap1, i, j, pixels[sliderValue * width * height + i * height + j]);
                 }
             });
 
@@ -73,7 +73,7 @@ namespace Project_DICOM
             {
                 for (int j = 0; j < height; j++)
                 {
-                    SetBitMap(bitMap2, countFiles - 1 - i, j, pixels[i][sliderValue][j]);
+                    SetBitMap(bitMap2, countFiles - 1 - i, j, pixels[i * width * height + sliderValue * height + j]);
                 }
             });
             BitmapSource bs = BitmapSource.Create(width, countFiles, 96d, 96d, pf, null, bitMap2, stride);
@@ -97,7 +97,7 @@ namespace Project_DICOM
             {
                 for (int j = 0; j < width; j++)
                 {
-                    SetBitMap(bitMap3, countFiles - 1 - i, j, pixels[i][j][sliderValue]);
+                    SetBitMap(bitMap3, countFiles - 1 - i, j, pixels[i * width * height + j * height + sliderValue]);
                 }
             });
 
@@ -117,19 +117,17 @@ namespace Project_DICOM
         }
         public void FillPixels()
         {
-            pixels = new byte[countFiles][][];
+            pixels = new byte[countFiles * width * height];
             int sliderL = (int)sliderLevel.Value;
             int sliderW = (int)sliderWidth.Value;
 
             Parallel.For(0, countFiles, i =>
             {
-                pixels[i] = new byte[width][];
                 for (int j = 0; j < width; j++)
                 {
-                    pixels[i][j] = new byte[height];
                     Parallel.For(0, height, k =>
                     {
-                        pixels[i][j][k] = dicoms[i].GetColor(j, k, sliderL, sliderW);
+                        pixels[i * width * height + j * height + k] = dicoms[i].GetColor(j, k, sliderL, sliderW);
                     });
                 }
             });
