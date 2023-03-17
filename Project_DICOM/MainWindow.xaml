@@ -32,12 +32,12 @@
                 <ScaleTransform ScaleY="2"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Slider x:Name="sliderLevel" HorizontalAlignment="Left" Margin="65,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideLevel" IsSnapToTickEnabled="True" TickFrequency="1">
+        <Slider x:Name="sliderLevel" HorizontalAlignment="Left" Margin="65,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideLevel" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-50" Maximum="50">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2.5"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Slider x:Name="sliderWidth" HorizontalAlignment="Left" Margin="977,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideWidth" IsSnapToTickEnabled="True" TickFrequency="1">
+        <Slider x:Name="sliderWidth" HorizontalAlignment="Left" Margin="977,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideWidth" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-50" Maximum="50">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2.5"/>
             </Slider.LayoutTransform>

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
@@ -30,8 +31,8 @@ namespace Project_DICOM
         public void SetSliders()
         {
             slider1.Maximum = countFiles - 1;
-            slider2.Maximum = dicoms[0].rows - 1;
-            slider3.Maximum = dicoms[0].cols - 1;
+            slider2.Maximum = width - 1;
+            slider3.Maximum = height - 1;
 
             slider1.Value = 0;
             slider2.Value = 0;
@@ -42,18 +43,20 @@ namespace Project_DICOM
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
+            int sliderValue = (int)slider1.Value;
             bitMap1 = new byte[stride * height];
             FillPixels();
-            for (int i = 0; i < dicoms[0].rows; i++)
+
+            Parallel.For(0, width, i =>
             {
-                for (int j = 0; j < dicoms[0].cols; j++)
+                for (int j = 0; j < height; j++)
                 {
-                    SetBitMap(bitMap1, i, j, pixels[(int)slider1.Value][i][j]);
+                    SetBitMap(bitMap1, i, j, pixels[sliderValue][i][j]);
                 }
-            }
+            });
 
             BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap1, stride);
-            RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.HighQuality);
+            //RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.HighQuality);
             //var bitmap = new TransformedBitmap(bs, 
             //    new ScaleTransform(1, 1));
             Image1.Source = bs;
@@ -62,44 +65,48 @@ namespace Project_DICOM
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
+            int sliderValue = (int)slider2.Value;
             bitMap2 = new byte[stride * height];
             FillPixels();
-            for (int i = 0; i < countFiles; i++)
+            
+            Parallel.For(0, countFiles, i =>
             {
-                for (int j = 0; j < dicoms[0].cols; j++)
+                for (int j = 0; j < height; j++)
                 {
-                    SetBitMap(bitMap2, countFiles - 1 - i, j, pixels[i][(int)slider2.Value][j]);
+                    SetBitMap(bitMap2, countFiles - 1 - i, j, pixels[i][sliderValue][j]);
                 }
-            }
+            });
             BitmapSource bs = BitmapSource.Create(width, countFiles, 96d, 96d, pf, null, bitMap2, stride);
-            //RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.NearestNeighbor);
-            CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
-            var bitmap = new TransformedBitmap(croppedBitmap, 
-                new ScaleTransform(1, 512.0 / countFiles));
-            RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
-            Image2.Source = bitmap;
 
+            CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
+            var bitmap = new TransformedBitmap(croppedBitmap,
+                new ScaleTransform(1, 512.0 / countFiles));
+            //RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
+            Image2.Source = bitmap;
         }
+
         public void DrawImage3()
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
+            int sliderValue = (int)slider3.Value;
             bitMap3 = new byte[stride * height];
             FillPixels();
-            for (int i = 0; i < countFiles; i++)
+
+            Parallel.For(0, countFiles, i =>
             {
-                for (int j = 0; j < dicoms[0].rows; j++)
+                for (int j = 0; j < width; j++)
                 {
-                    SetBitMap(bitMap3, countFiles - 1 - i, j, pixels[i][j][(int)slider3.Value]);
+                    SetBitMap(bitMap3, countFiles - 1 - i, j, pixels[i][j][sliderValue]);
                 }
-            }
+            });
 
             BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap3, stride);
             
             CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
             var bitmap = new TransformedBitmap(croppedBitmap,
                 new ScaleTransform(1, 512.0 / countFiles));
-            RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
+            //RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
             Image3.Source = bitmap;
         }
         public void DrawImages()
@@ -111,19 +118,23 @@ namespace Project_DICOM
         public void FillPixels()
         {
             pixels = new byte[countFiles][][];
-            for (int i = 0; i < countFiles; i++)
+            int sliderL = (int)sliderLevel.Value;
+            int sliderW = (int)sliderWidth.Value;
+
+            Parallel.For(0, countFiles, i =>
             {
-                pixels[i] = new byte[dicoms[0].rows][];
-                for (int j = 0; j < dicoms[0].rows; j++)
+                pixels[i] = new byte[width][];
+                for (int j = 0; j < width; j++)
                 {
-                    pixels[i][j] = new byte[dicoms[0].cols];
-                    for (int k = 0; k < dicoms[0].rows; k++)
+                    pixels[i][j] = new byte[height];
+                    Parallel.For(0, height, k =>
                     {
-                        pixels[i][j][k] = dicoms[i].GetColor(j, k);
-                    }
+                        pixels[i][j][k] = dicoms[i].GetColor(j, k, sliderL, sliderW);
+                    });
                 }
-            }
+            });
         }
+
         public void SetBitMap(byte[] bitMap, int x, int y, byte color)
         {
             bitMap[512 * 4 * x + 4 * y] = color;
@@ -157,12 +168,20 @@ namespace Project_DICOM
 
         private void OnSlideLevel(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-
+            if (countFiles > 0)
+            {
+                FillPixels();
+                DrawImages();
+            }
         }
 
         private void OnSlideWidth(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-
+            if (countFiles > 0)
+            {
+                FillPixels();
+                DrawImages();
+            }
         }
 
         private void OnPickFolder(object sender, RoutedEventArgs e)
@@ -183,14 +202,16 @@ namespace Project_DICOM
             }
 
             IEnumerable<string> files = Directory.EnumerateFiles(directory);
-            List<string> lf = new List<string>(files);
-            lf.Sort((s1, s2) => Int32.Parse(Regex.Match(s1, @"(\d+)(?!.*\d)").Value).
+            List<string> lof = new List<string>(files);
+
+            // Sortowanie plików według liczb na końcu ścieżki
+            lof.Sort((s1, s2) => Int32.Parse(Regex.Match(s1, @"(\d+)(?!.*\d)").Value).
                 CompareTo(Int32.Parse(Regex.Match(s2, @"(\d+)(?!.*\d)").Value)));
 
             countFiles = 0;
             dicoms = new Dicom[files.Count()];
 
-            foreach (string file in lf)
+            foreach (string file in lof)
             {
                 fileBytes = File.ReadAllBytes(file);
                 Dicom dicom = new Dicom();

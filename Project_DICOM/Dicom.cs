@@ -10,8 +10,7 @@ namespace Project_DICOM
         public Dicom() { }
 
         List<string> specialTags = new List<string>() { "OB", "OW", "SQ" };
-        NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat;
-        public int id; 
+        NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat; 
 
         // (7fe0,0010) Pixel Data
         public int[][] pixelData;
@@ -82,13 +81,14 @@ namespace Project_DICOM
 
             for (i += 4; i < bytes.Length; i += skip)
             {
-                skip = 6;
                 tagGroup = ((bytes[i + 1]) << 8) + bytes[i];
                 tagNumber = (bytes[i + 3] << 8) + bytes[i + 2];
 
                 string dataType = "";
                 dataType += (char)bytes[i + 4];
                 dataType += (char)bytes[i + 5];
+
+                skip = 6; // 6 powyższych bajtów
 
                 if (specialTags.Contains(dataType))
                 {
@@ -245,25 +245,26 @@ namespace Project_DICOM
                 }
             }
         }
-        public byte GetColor(int x, int y)
+        public byte GetColor(int x, int y, int sliderL, int sliderW)
         {
-            byte yMin = 0;
-            byte yMax = 255;
-            float center = windowCenter - 0.5f;
-            float width = windowWidth - 1.0f;
-            float value = pixelData[x][y] * rescaleSlope + rescaleIntercept;
+            float color = pixelData[x][y] * rescaleSlope + rescaleIntercept;
+            float center = windowCenter - 0.5f + sliderL;
+            float width = windowWidth - 1.0f + sliderW;
+            byte min = 0;
+            byte max = 255;
 
-            if (value <= (center - width / 2.0f))
+            // Wzory z dokumentacji
+            if (color <= (center - width / 2.0f))
             {
-                return yMin;
+                return min;
             }
-            else if (value > (center + width / 2.0f))
+            else if (color > (center + width / 2.0f))
             {
-                return yMax;
+                return max;
             }
             else
             {
-                return (byte)(((value - center) / width + 0.5f) * (yMax - yMin) + yMin);
+                return (byte)(((color - center) / width + 0.5f) * (max - min) + min);
             }
         }
         public string CheckPattern(byte[] bytes, int start, int end)
