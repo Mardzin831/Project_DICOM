@@ -186,12 +186,12 @@ namespace Project_DICOM
 
         private void OnLeftClick1(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if(line1.Visibility == Visibility.Visible || label1.Visibility == Visibility.Visible)
+            if(line1.Visibility == Visibility.Visible && label1.Visibility == Visibility.Visible)
             {
-                line1.Visibility = Visibility.Collapsed;
-                label1.Visibility = Visibility.Collapsed;
+                line1.Visibility = Visibility.Hidden;
+                label1.Visibility = Visibility.Hidden;
             }
-            else
+            else if(line1.Visibility == Visibility.Hidden && label1.Visibility == Visibility.Hidden)
             {
                 Point point = e.GetPosition(Image1);
                 line1.X1 = point.X;
@@ -199,14 +199,6 @@ namespace Project_DICOM
                 line1.X2 = point.X + 1;
                 line1.Y2 = point.Y + 1;
                 line1.Visibility = Visibility.Visible;
-            }
-        }
-
-        private void OnLeftUp1(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if(label1.Visibility == Visibility.Visible)
-            {
-                label1.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -217,6 +209,62 @@ namespace Project_DICOM
                 label1.Visibility = Visibility.Visible;
                 label1.Margin = new Thickness((line1.X1 + line1.X2) / 2, (line1.Y1 + line1.Y2) / 2, 0, 0);
                 label1.Content = 25.ToString() + "mm";
+            }
+        }
+
+        private void OnLeftClick2(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (line2.Visibility == Visibility.Visible && label2.Visibility == Visibility.Visible)
+            {
+                line2.Visibility = Visibility.Hidden;
+                label2.Visibility = Visibility.Hidden;
+            }
+            else if (line2.Visibility == Visibility.Hidden && label2.Visibility == Visibility.Hidden)
+            {
+                Point point = e.GetPosition(Image2);
+                line2.X1 = point.X;
+                line2.Y1 = point.Y;
+                line2.X2 = point.X + 1;
+                line2.Y2 = point.Y + 1;
+                line2.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                Point point = e.GetPosition(Image2);
+                line2.X2 = point.X;
+                line2.Y2 = point.Y;
+
+                label2.Visibility = Visibility.Visible;
+                label2.Margin = new Thickness((line2.X1 + line2.X2) / 2, (line2.Y1 + line2.Y2) / 2, 0, 0);
+                label2.Content = 25.ToString() + "mm";
+            }
+        }
+
+        private void OnLeftClick3(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (line3.Visibility == Visibility.Visible && label3.Visibility == Visibility.Visible)
+            {
+                line3.Visibility = Visibility.Hidden;
+                label3.Visibility = Visibility.Hidden;
+            }
+            else if (line3.Visibility == Visibility.Hidden && label3.Visibility == Visibility.Hidden)
+            {
+                Point point = e.GetPosition(Image3);
+                line3.X1 = point.X;
+                line3.Y1 = point.Y;
+                line3.X2 = point.X + 1;
+                line3.Y2 = point.Y + 1;
+                line3.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                Point point = e.GetPosition(Image3);
+                line3.X2 = point.X;
+                line3.Y2 = point.Y;
+
+                label3.Visibility = Visibility.Visible;
+                label3.Margin = new Thickness((line3.X1 + line3.X2) / 2, (line3.Y1 + line3.Y2) / 2, 0, 0);
+                label3.Content = 25.ToString() + "mm";
             }
         }
 
