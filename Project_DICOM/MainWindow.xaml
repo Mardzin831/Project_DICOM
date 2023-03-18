@@ -7,37 +7,45 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1570">
     <Grid Margin="1" Background="LightSlateGray">
-        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="699,595,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
+        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="699,607,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
         <Border Margin="5,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
-            <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
+            <Grid>
+                <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512" PreviewMouseLeftButtonDown="OnLeftClick1" PreviewMouseLeftButtonUp="OnLeftUp1"/>
+                <Line x:Name="line1" Visibility="Hidden" Stroke="Red" StrokeThickness="3"/>
+                <Label x:Name="label1" Visibility="Hidden" FontSize="20" Foreground="OrangeRed"/>
+            </Grid>
         </Border>
         <Border Margin="520,5,0,0" Width="512" BorderThickness="1" BorderBrush="Black" Height="512" VerticalAlignment="Top" HorizontalAlignment="Left">
-            <Image x:Name="Image2" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
+            <Grid>
+                <Image x:Name="Image2" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
+            </Grid>
         </Border>
         <Border Margin="1034,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
-            <Image x:Name="Image3" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
+            <Grid>
+                <Image x:Name="Image3" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512"/>
+            </Grid>
         </Border>
-        <Slider x:Name="slider1" HorizontalAlignment="Left" Margin="5,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide1" IsSnapToTickEnabled="True" TickFrequency="1">
+        <Slider x:Name="slider1" HorizontalAlignment="Left" Margin="5,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide1" IsSnapToTickEnabled="True" TickFrequency="1" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" IsMoveToPointEnabled="True">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Slider x:Name="slider2" HorizontalAlignment="Left" Margin="520,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide2" IsSnapToTickEnabled="True" TickFrequency="1">
+        <Slider x:Name="slider2" HorizontalAlignment="Left" Margin="520,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide2" IsSnapToTickEnabled="True" TickFrequency="1" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" IsMoveToPointEnabled="True">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Slider x:Name="slider3" HorizontalAlignment="Left" Margin="1034,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide3" IsSnapToTickEnabled="True" TickFrequency="1">
+        <Slider x:Name="slider3" HorizontalAlignment="Left" Margin="1034,545,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlide3" IsSnapToTickEnabled="True" TickFrequency="1" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" IsMoveToPointEnabled="True">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Slider x:Name="sliderLevel" HorizontalAlignment="Left" Margin="65,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideLevel" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-50" Maximum="50">
+        <Slider x:Name="sliderLevel" HorizontalAlignment="Left" Margin="65,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideLevel" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-50" Maximum="50" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2.5"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Slider x:Name="sliderWidth" HorizontalAlignment="Left" Margin="977,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideWidth" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-50" Maximum="50">
+        <Slider x:Name="sliderWidth" HorizontalAlignment="Left" Margin="977,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideWidth" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-50" Maximum="50" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2.5"/>
             </Slider.LayoutTransform>

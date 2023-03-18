@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace Project_DICOM
 {
@@ -26,6 +27,9 @@ namespace Project_DICOM
         public MainWindow()
         {
             InitializeComponent();
+            RenderOptions.SetBitmapScalingMode(Image1, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(Image2, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(Image3, BitmapScalingMode.NearestNeighbor);
         }
 
         public void SetSliders()
@@ -56,7 +60,7 @@ namespace Project_DICOM
             });
 
             BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap1, stride);
-            //RenderOptions.SetBitmapScalingMode(bs, BitmapScalingMode.HighQuality);
+
             //var bitmap = new TransformedBitmap(bs, 
             //    new ScaleTransform(1, 1));
             Image1.Source = bs;
@@ -81,7 +85,6 @@ namespace Project_DICOM
             CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
             var bitmap = new TransformedBitmap(croppedBitmap,
                 new ScaleTransform(1, 512.0 / countFiles));
-            //RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
             Image2.Source = bitmap;
         }
 
@@ -106,7 +109,6 @@ namespace Project_DICOM
             CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
             var bitmap = new TransformedBitmap(croppedBitmap,
                 new ScaleTransform(1, 512.0 / countFiles));
-            //RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
             Image3.Source = bitmap;
         }
         public void DrawImages()
@@ -179,6 +181,42 @@ namespace Project_DICOM
             {
                 FillPixels();
                 DrawImages();
+            }
+        }
+
+        private void OnLeftClick1(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if(line1.Visibility == Visibility.Visible || label1.Visibility == Visibility.Visible)
+            {
+                line1.Visibility = Visibility.Collapsed;
+                label1.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                Point point = e.GetPosition(Image1);
+                line1.X1 = point.X;
+                line1.Y1 = point.Y;
+                line1.X2 = point.X + 1;
+                line1.Y2 = point.Y + 1;
+                line1.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void OnLeftUp1(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if(label1.Visibility == Visibility.Visible)
+            {
+                label1.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                Point point = e.GetPosition(Image1);
+                line1.X2 = point.X;
+                line1.Y2 = point.Y;
+
+                label1.Visibility = Visibility.Visible;
+                label1.Margin = new Thickness((line1.X1 + line1.X2) / 2, (line1.Y1 + line1.Y2) / 2, 0, 0);
+                label1.Content = 25.ToString() + "mm";
             }
         }
 
