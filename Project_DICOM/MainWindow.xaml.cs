@@ -226,8 +226,7 @@ namespace Project_DICOM
         private void OnLeftClick2(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             float spacing = dicoms[0].pixelSpacing[0];
-            float thick = dicoms[0].sliceThickness;
-            double scale = thick * spacing;
+            double scale = countFiles / 100.0;
             double distance;
 
             if (line2.Visibility == Visibility.Visible && label2.Visibility == Visibility.Visible)
@@ -249,8 +248,8 @@ namespace Project_DICOM
                 Point point = e.GetPosition(Image2);
                 line2.X2 = point.X;
                 line2.Y2 = point.Y;
-                distance = Math.Sqrt((line2.X2 - line2.X1) * (line2.X2 - line2.X1) + (line2.Y2 - line2.Y1) * (line2.Y2 - line2.Y1) * scale) * spacing;
-                Debug.WriteLine(scale);
+                distance = Math.Sqrt((line2.X2 - line2.X1) * (line2.X2 - line2.X1) + (line2.Y2 - line2.Y1) * (line2.Y2 - line2.Y1) * scale * scale) * spacing;
+
                 label2.Visibility = Visibility.Visible;
                 label2.Margin = new Thickness((line2.X1 + line2.X2) / 2, (line2.Y1 + line2.Y2) / 2, 0, 0);
                 if (distance >= 10)
@@ -267,8 +266,7 @@ namespace Project_DICOM
         private void OnLeftClick3(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             float spacing = dicoms[0].pixelSpacing[0];
-            float thick = dicoms[0].sliceThickness;
-            double scale = thick * spacing;
+            double scale = countFiles / 100.0;
             double distance;
 
             if (line3.Visibility == Visibility.Visible && label3.Visibility == Visibility.Visible)
@@ -290,7 +288,7 @@ namespace Project_DICOM
                 Point point = e.GetPosition(Image3);
                 line3.X2 = point.X;
                 line3.Y2 = point.Y;
-                distance = Math.Sqrt((line3.X2 - line3.X1) * (line3.X2 - line3.X1) + (line3.Y2 - line3.Y1) * (line3.Y2 - line3.Y1) * scale) * spacing;
+                distance = Math.Sqrt((line3.X2 - line3.X1) * (line3.X2 - line3.X1) + (line3.Y2 - line3.Y1) * (line3.Y2 - line3.Y1) * scale * scale) * spacing;
 
                 label3.Visibility = Visibility.Visible;
                 label3.Margin = new Thickness((line3.X1 + line3.X2) / 2, (line3.Y1 + line3.Y2) / 2, 0, 0);

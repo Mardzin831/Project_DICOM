@@ -81,7 +81,7 @@ namespace Project_DICOM
 
             for (i += 4; i < bytes.Length; i += skip)
             {
-                tagGroup = ((bytes[i + 1]) << 8) + bytes[i];
+                tagGroup = (bytes[i + 1] << 8) + bytes[i];
                 tagNumber = (bytes[i + 3] << 8) + bytes[i + 2];
 
                 string dataType = "";
