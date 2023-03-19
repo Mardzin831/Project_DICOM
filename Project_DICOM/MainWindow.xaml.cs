@@ -186,7 +186,9 @@ namespace Project_DICOM
 
         private void OnLeftClick1(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if(line1.Visibility == Visibility.Visible && label1.Visibility == Visibility.Visible)
+            float spacing = dicoms[0].pixelSpacing[0];
+            double distance;
+            if (line1.Visibility == Visibility.Visible && label1.Visibility == Visibility.Visible)
             {
                 line1.Visibility = Visibility.Hidden;
                 label1.Visibility = Visibility.Hidden;
@@ -205,15 +207,29 @@ namespace Project_DICOM
                 Point point = e.GetPosition(Image1);
                 line1.X2 = point.X;
                 line1.Y2 = point.Y;
+                distance = Math.Sqrt((line1.X2 - line1.X1) * (line1.X2 - line1.X1) + (line1.Y2 - line1.Y1) * (line1.Y2 - line1.Y1)) * spacing;
 
                 label1.Visibility = Visibility.Visible;
                 label1.Margin = new Thickness((line1.X1 + line1.X2) / 2, (line1.Y1 + line1.Y2) / 2, 0, 0);
-                label1.Content = 25.ToString() + "mm";
+                if(distance >= 10)
+                {
+                    label1.Content = (distance / 10).ToString("F2") + " cm";
+                }
+                else
+                {
+                    label1.Content = distance.ToString("F2") + " mm";
+                }
+                
             }
         }
 
         private void OnLeftClick2(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            float spacing = dicoms[0].pixelSpacing[0];
+            float thick = dicoms[0].sliceThickness;
+            double scale = thick * spacing;
+            double distance;
+
             if (line2.Visibility == Visibility.Visible && label2.Visibility == Visibility.Visible)
             {
                 line2.Visibility = Visibility.Hidden;
@@ -233,15 +249,28 @@ namespace Project_DICOM
                 Point point = e.GetPosition(Image2);
                 line2.X2 = point.X;
                 line2.Y2 = point.Y;
-
+                distance = Math.Sqrt((line2.X2 - line2.X1) * (line2.X2 - line2.X1) + (line2.Y2 - line2.Y1) * (line2.Y2 - line2.Y1) * scale) * spacing;
+                Debug.WriteLine(scale);
                 label2.Visibility = Visibility.Visible;
                 label2.Margin = new Thickness((line2.X1 + line2.X2) / 2, (line2.Y1 + line2.Y2) / 2, 0, 0);
-                label2.Content = 25.ToString() + "mm";
+                if (distance >= 10)
+                {
+                    label2.Content = (distance / 10).ToString("F2") + " cm";
+                }
+                else
+                {
+                    label2.Content = distance.ToString("F2") + " mm";
+                }
             }
         }
 
         private void OnLeftClick3(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            float spacing = dicoms[0].pixelSpacing[0];
+            float thick = dicoms[0].sliceThickness;
+            double scale = thick * spacing;
+            double distance;
+
             if (line3.Visibility == Visibility.Visible && label3.Visibility == Visibility.Visible)
             {
                 line3.Visibility = Visibility.Hidden;
@@ -261,10 +290,18 @@ namespace Project_DICOM
                 Point point = e.GetPosition(Image3);
                 line3.X2 = point.X;
                 line3.Y2 = point.Y;
+                distance = Math.Sqrt((line3.X2 - line3.X1) * (line3.X2 - line3.X1) + (line3.Y2 - line3.Y1) * (line3.Y2 - line3.Y1) * scale) * spacing;
 
                 label3.Visibility = Visibility.Visible;
                 label3.Margin = new Thickness((line3.X1 + line3.X2) / 2, (line3.Y1 + line3.Y2) / 2, 0, 0);
-                label3.Content = 25.ToString() + "mm";
+                if (distance >= 10)
+                {
+                    label3.Content = (distance / 10).ToString("F2") + " cm";
+                }
+                else
+                {
+                    label3.Content = distance.ToString("F2") + " mm";
+                }
             }
         }
 
