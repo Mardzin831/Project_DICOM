@@ -59,7 +59,7 @@ namespace Project_DICOM
             bool found = false;
             int i;
 
-            // Search for DICM
+            // Szukanie DICM
             for (i = 0; i + 3 < bytes.Length; i += 4)
             {
                 if (bytes[i] == 'D' && bytes[i + 1] == 'I' && bytes[i + 2] == 'C' && bytes[i + 3] == 'M')
@@ -93,38 +93,40 @@ namespace Project_DICOM
                 if (specialTags.Contains(dataType))
                 {
                     count = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
+                    Debug.WriteLine(count + " 1");
                     skip += 4;
                 }
                 else
                 {
+                    Debug.WriteLine(count + " 2");
                     count = (bytes[i + 7] << 8) + bytes[i + 6];
                 }
                 skip += 2 + count;
 
-                // (0028, 0010) Rows
+                // (0028,0010) Rows
                 if (tagGroup == 0x0028 && tagNumber == 0x0010)
                 {
                     rows = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
                 }
 
-                // (0028, 0011) Columns
+                // (0028,0011) Columns
                 if (tagGroup == 0x0028 && tagNumber == 0x0011)
                 {
                     cols = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
                 }
 
-                // (0028, 0101) Bits Stored
+                // (0028,0101) Bits Stored
                 if (tagGroup == 0x0028 && tagNumber == 0x0101)
                 {
                     bitsStored = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
                 }
 
-                // (0028, 0100) Bits Allocated
+                // (0028,0100) Bits Allocated
                 if (tagGroup == 0x0028 && tagNumber == 0x0100)
                 {
                     bitsAllocated = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
                 }
-                // (0028, 1053) Rescale Slope
+                // (0028,1053) Rescale Slope
                 if (tagGroup == 0x0028 && tagNumber == 0x1053)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -134,7 +136,7 @@ namespace Project_DICOM
                     rescaleSlope = a;
                 }
 
-                // (0028, 1052) Rescale Intercept
+                // (0028,1052) Rescale Intercept
                 if (tagGroup == 0x0028 && tagNumber == 0x1052)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -144,7 +146,7 @@ namespace Project_DICOM
                     rescaleIntercept = a;
                 }
 
-                // (0028, 0030) Pixel Spacing [2]
+                // (0028,0030) Pixel Spacing [2]
                 if (tagGroup == 0x0028 && tagNumber == 0x0030)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -156,7 +158,7 @@ namespace Project_DICOM
                     pixelSpacing[1] = b;
                 }
 
-                //(0018, 0050) Slice Thickness
+                //(0018,0050) Slice Thickness
                 if (tagGroup == 0x0018 && tagNumber == 0x0050)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -165,7 +167,7 @@ namespace Project_DICOM
                     sliceThickness = a;
                 }
 
-                // (0018, 0088) Spacing Between Slices
+                // (0018,0088) Spacing Between Slices
                 if (tagGroup == 0x0018 && tagNumber == 0x0088)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -174,7 +176,7 @@ namespace Project_DICOM
                     spacingBetweenSlices = a;
                 }
 
-                // (0020, 0032) Image Position (Patient) [3]
+                // (0020,0032) Image Position (Patient) [3]
                 if (tagGroup == 0x0020 && tagNumber == 0x0032)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -189,7 +191,7 @@ namespace Project_DICOM
                     imagePosition[2] = c;
                 }
 
-                // (0028, 1050) Window Center
+                // (0028,1050) Window Center
                 if (tagGroup == 0x0028 && tagNumber == 0x1050)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -199,7 +201,7 @@ namespace Project_DICOM
                     windowCenter = a;
                 }
 
-                // (0028, 1051) Window Width
+                // (0028,1051) Window Width
                 if (tagGroup == 0x0028 && tagNumber == 0x1051)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -209,7 +211,7 @@ namespace Project_DICOM
                     windowWidth = a;
                 }
 
-                // (0020, 1041) Slice Location
+                // (0020,1041) Slice Location
                 if (tagGroup == 0x0020 && tagNumber == 0x1041)
                 {
                     string buffer = CheckPattern(bytes, i + skip - count, i + skip);
@@ -219,7 +221,7 @@ namespace Project_DICOM
                     sliceLocation = a;
                 }
 
-                // (7fe0, 0010) Pixel Data
+                // (7fe0,0010) Pixel Data
                 if (tagGroup == 0x7fe0 && tagNumber == 0x0010)
                 {
                     i += skip - count;
@@ -242,6 +244,19 @@ namespace Project_DICOM
                 }
             }
         }
+        public string CheckPattern(byte[] bytes, int start, int end)
+        {
+            char[] buffer = new char[end - start + 1];
+            int i = 0;
+            for (; bytes[start] != bytes[end]; start++)
+            {
+                buffer[i] = (char)bytes[start];
+                i++;
+            }
+            buffer[i] = '\0';
+            return new string(buffer);
+        }
+
         public byte GetColor(int x, int y, int sliderL, int sliderW)
         {
             float color = pixelData[x * cols + y] * rescaleSlope + rescaleIntercept;
@@ -264,18 +279,5 @@ namespace Project_DICOM
                 return (byte)(((color - center) / width + 0.5f) * (max - min) + min);
             }
         }
-        public string CheckPattern(byte[] bytes, int start, int end)
-        {
-            char[] buffer = new char[end - start + 1];
-            int i = 0;
-            for (; bytes[start] != bytes[end]; start++)
-            {
-                buffer[i] = (char)bytes[start];
-                i++;
-            }
-            buffer[i] = '\0';
-            return new string(buffer);
-        }
-
     }
 }
