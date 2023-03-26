@@ -39,9 +39,6 @@ namespace Project_DICOM
         // (0018,0050) Slice Thickness
         public float sliceThickness;
 
-        // (0018,0088) Spacing Between Slices
-        public float spacingBetweenSlices;
-
         // (0020,0032) Image Position (Patient) [3]
         public float[] imagePosition = new float[3];
 
@@ -70,7 +67,7 @@ namespace Project_DICOM
             }
             if (!found)
             {
-                Debug.WriteLine("DICM not found");
+                Debug.WriteLine("Brak DICM");
                 return;
             }
 
@@ -93,12 +90,10 @@ namespace Project_DICOM
                 if (specialTags.Contains(dataType))
                 {
                     count = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
-                    Debug.WriteLine(count + " 1");
                     skip += 4;
                 }
                 else
                 {
-                    Debug.WriteLine(count + " 2");
                     count = (bytes[i + 7] << 8) + bytes[i + 6];
                 }
                 skip += 2 + count;
@@ -165,15 +160,6 @@ namespace Project_DICOM
                     float a = float.Parse(buffer, nfi);
 
                     sliceThickness = a;
-                }
-
-                // (0018,0088) Spacing Between Slices
-                if (tagGroup == 0x0018 && tagNumber == 0x0088)
-                {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
-                    float a = float.Parse(buffer, nfi);
-
-                    spacingBetweenSlices = a;
                 }
 
                 // (0020,0032) Image Position (Patient) [3]

@@ -303,6 +303,105 @@ namespace Project_DICOM
             }
         }
 
+        private void OnRightClick1(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (spot1.Visibility == Visibility.Visible)
+            {
+                spot1.Visibility = Visibility.Hidden;
+                spot2.Visibility = Visibility.Hidden;
+                spot3.Visibility = Visibility.Hidden;
+            }
+            else if (spot1.Visibility == Visibility.Hidden)
+            {
+                Point point = e.GetPosition(Image1);
+
+                spot1.X1 = point.X - 2;
+                spot1.Y1 = point.Y - 2;
+                spot1.X2 = point.X + 2;
+                spot1.Y2 = point.Y + 2;
+
+                spot2.X1 = point.X - 2;
+                spot2.Y1 = 0;
+                spot2.X2 = point.X + 2;
+                spot2.Y2 = 512;
+
+                spot3.X1 = point.Y - 2;
+                spot3.Y1 = 0;
+                spot3.X2 = point.Y + 2;
+                spot3.Y2 = 512;
+
+                spot1.Visibility = Visibility.Visible;
+                spot2.Visibility = Visibility.Visible;
+                spot3.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void OnRightClick2(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (spot1.Visibility == Visibility.Visible)
+            {
+                spot1.Visibility = Visibility.Hidden;
+                spot2.Visibility = Visibility.Hidden;
+                spot3.Visibility = Visibility.Hidden;
+            }
+            else if (spot1.Visibility == Visibility.Hidden)
+            {
+                Point point = e.GetPosition(Image2);
+
+                spot1.X1 = point.X - 2;
+                spot1.Y1 = 0;
+                spot1.X2 = point.X + 2;
+                spot1.Y2 = 512;
+
+                spot2.X1 = point.X - 2;
+                spot2.Y1 = point.Y - 2;
+                spot2.X2 = point.X + 2;
+                spot2.Y2 = point.Y + 2;
+
+                spot3.X1 = 0;
+                spot3.Y1 = point.Y - 2;
+                spot3.X2 = 512;
+                spot3.Y2 = point.Y + 2;
+
+                spot1.Visibility = Visibility.Visible;
+                spot2.Visibility = Visibility.Visible;
+                spot3.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void OnRightClick3(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (spot1.Visibility == Visibility.Visible)
+            {
+                spot1.Visibility = Visibility.Hidden;
+                spot2.Visibility = Visibility.Hidden;
+                spot3.Visibility = Visibility.Hidden;
+            }
+            else if (spot1.Visibility == Visibility.Hidden)
+            {
+                Point point = e.GetPosition(Image3);
+
+                spot1.X1 = 0;
+                spot1.Y1 = point.X - 2;
+                spot1.X2 = 512;
+                spot1.Y2 = point.X + 2;
+
+                spot2.X1 = 0;
+                spot2.Y1 = point.Y - 2;
+                spot2.X2 = 512;
+                spot2.Y2 = point.Y + 2;
+
+                spot3.X1 = point.X - 2;
+                spot3.Y1 = point.Y - 2;
+                spot3.X2 = point.X + 2;
+                spot3.Y2 = point.Y + 2;
+
+                spot1.Visibility = Visibility.Visible;
+                spot2.Visibility = Visibility.Visible;
+                spot3.Visibility = Visibility.Visible;
+            }
+        }
+
         private void OnPickFolder(object sender, RoutedEventArgs e)
         {
             string directory = "";
