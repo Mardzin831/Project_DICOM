@@ -728,9 +728,8 @@ namespace Project_DICOM
                 LoadFile(fileBytes);
                 countFiles += 1;
             }
-            
-            DrawImages();
             SetSliders();
+            DrawImages();
         }
     }
 }
