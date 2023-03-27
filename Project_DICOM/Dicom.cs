@@ -9,7 +9,7 @@ namespace Project_DICOM
     {
         public Dicom() { }
 
-        List<string> specialTags = new List<string>() { "OB", "OW", "SQ" };
+        List<string> valueReps = new List<string>() { "OB", "OW", "SQ" };
         NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat; 
 
         // (7fe0,0010) Pixel Data
@@ -71,60 +71,60 @@ namespace Project_DICOM
                 return;
             }
 
-            int skip = 0;
-            int count = 0;
+            int ignore;
+            int count;
             int tagGroup;
             int tagNumber;
 
-            for (i += 4; i < bytes.Length; i += skip)
+            for (i += 4; i < bytes.Length; i += ignore)
             {
                 tagGroup = (bytes[i + 1] << 8) + bytes[i];
                 tagNumber = (bytes[i + 3] << 8) + bytes[i + 2];
 
-                string dataType = "";
-                dataType += (char)bytes[i + 4];
-                dataType += (char)bytes[i + 5];
+                string vr = "";
+                vr += (char)bytes[i + 4];
+                vr += (char)bytes[i + 5];
 
-                skip = 6; // 6 powyższych bajtów
+                ignore = 6;
 
-                if (specialTags.Contains(dataType))
+                if (valueReps.Contains(vr))
                 {
                     count = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
-                    skip += 4;
+                    ignore += 4;
                 }
                 else
                 {
                     count = (bytes[i + 7] << 8) + bytes[i + 6];
                 }
-                skip += 2 + count;
+                ignore += 2 + count;
 
                 // (0028,0010) Rows
                 if (tagGroup == 0x0028 && tagNumber == 0x0010)
                 {
-                    rows = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
+                    rows = (bytes[i + ignore - count + 1] << 8) + bytes[i + ignore - count];
                 }
 
                 // (0028,0011) Columns
                 if (tagGroup == 0x0028 && tagNumber == 0x0011)
                 {
-                    cols = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
+                    cols = (bytes[i + ignore - count + 1] << 8) + bytes[i + ignore - count];
                 }
 
                 // (0028,0101) Bits Stored
                 if (tagGroup == 0x0028 && tagNumber == 0x0101)
                 {
-                    bitsStored = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
+                    bitsStored = (bytes[i + ignore - count + 1] << 8) + bytes[i + ignore - count];
                 }
 
                 // (0028,0100) Bits Allocated
                 if (tagGroup == 0x0028 && tagNumber == 0x0100)
                 {
-                    bitsAllocated = (bytes[i + skip - count + 1] << 8) + bytes[i + skip - count];
+                    bitsAllocated = (bytes[i + ignore - count + 1] << 8) + bytes[i + ignore - count];
                 }
                 // (0028,1053) Rescale Slope
                 if (tagGroup == 0x0028 && tagNumber == 0x1053)
                 {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
                     var parts = buffer.Split('\\');
                     float a = float.Parse(parts[0], nfi);
 
@@ -134,7 +134,7 @@ namespace Project_DICOM
                 // (0028,1052) Rescale Intercept
                 if (tagGroup == 0x0028 && tagNumber == 0x1052)
                 {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
                     var parts = buffer.Split('\\');
                     float a = float.Parse(parts[0], nfi);
 
@@ -144,7 +144,7 @@ namespace Project_DICOM
                 // (0028,0030) Pixel Spacing [2]
                 if (tagGroup == 0x0028 && tagNumber == 0x0030)
                 {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
                     var parts = buffer.Split('\\');
                     float a = float.Parse(parts[0], nfi);
                     float b = float.Parse(parts[1], nfi);
@@ -156,7 +156,7 @@ namespace Project_DICOM
                 //(0018,0050) Slice Thickness
                 if (tagGroup == 0x0018 && tagNumber == 0x0050)
                 {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
                     float a = float.Parse(buffer, nfi);
 
                     sliceThickness = a;
@@ -165,7 +165,7 @@ namespace Project_DICOM
                 // (0020,0032) Image Position (Patient) [3]
                 if (tagGroup == 0x0020 && tagNumber == 0x0032)
                 {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
                     var parts = buffer.Split('\\');
 
                     float a = float.Parse(parts[0], nfi);
@@ -180,7 +180,7 @@ namespace Project_DICOM
                 // (0028,1050) Window Center
                 if (tagGroup == 0x0028 && tagNumber == 0x1050)
                 {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
                     var parts = buffer.Split('\\');
                     float a = float.Parse(parts[0], nfi);
 
@@ -190,7 +190,7 @@ namespace Project_DICOM
                 // (0028,1051) Window Width
                 if (tagGroup == 0x0028 && tagNumber == 0x1051)
                 {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
                     var parts = buffer.Split('\\');
                     float a = float.Parse(parts[0], nfi);
 
@@ -200,7 +200,7 @@ namespace Project_DICOM
                 // (0020,1041) Slice Location
                 if (tagGroup == 0x0020 && tagNumber == 0x1041)
                 {
-                    string buffer = CheckPattern(bytes, i + skip - count, i + skip);
+                    string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
                     var parts = buffer.Split('\\');
                     float a = float.Parse(parts[0], nfi);
 
@@ -210,7 +210,7 @@ namespace Project_DICOM
                 // (7fe0,0010) Pixel Data
                 if (tagGroup == 0x7fe0 && tagNumber == 0x0010)
                 {
-                    i += skip - count;
+                    i += ignore - count;
                     break;
                 }
             }
