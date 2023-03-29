@@ -21,6 +21,7 @@ namespace Project_DICOM
         byte[] bitMap3;
         int width = 512, height = 512;
         int countFiles;
+        public float[] pixels;
 
         List<string> valueReps = new List<string>() { "OB", "OW", "SQ" };
         NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat;
@@ -296,6 +297,7 @@ namespace Project_DICOM
                     pixelData[countFiles * width * height + j * width + k] = ((color - center) / range + 0.5f) * (max - min) + min;
                 }
 
+                pixels[countFiles * width * height + j * width + k] = ((bytes[i + 1]) << 8) + bytes[i];
                 if (k == width)
                 {
                     k = 0;
@@ -316,6 +318,38 @@ namespace Project_DICOM
             }
             
             return new string(buffer);
+        }
+
+        public void SetColors()
+        {
+            for (int i = 0; i < countFiles; i++)
+            {
+                for(int j = 0; j < width; j++)
+                {
+                    for(int k = 0; k < height; k++)
+                    {
+                        float color = pixels[i * width * height + j * width + k] * rescaleSlope + rescaleIntercept;
+                        float center = windowCenter - 0.5f + (int)sliderLevel.Value;
+                        float range = windowWidth - 1.0f + (int)sliderWidth.Value;
+                        byte min = 0;
+                        byte max = 255;
+
+                        // Wzory z dokumentacji
+                        if (color <= (center - range / 2.0f))
+                        {
+                            pixelData[i * width * height + j * width + k] = min;
+                        }
+                        else if (color > (center + range / 2.0f))
+                        {
+                            pixelData[i * width * height + j * width + k] = max;
+                        }
+                        else
+                        {
+                            pixelData[i * width * height + j * width + k] = ((color - center) / range + 0.5f) * (max - min) + min;
+                        }
+                    }
+                }
+            }
         }
 
         public void SetSliders()
@@ -396,6 +430,7 @@ namespace Project_DICOM
         }
         public void DrawImages()
         {
+            SetColors();
             DrawImage1();
             DrawImage2();
             DrawImage3();
@@ -701,7 +736,9 @@ namespace Project_DICOM
             countFiles = 0;
             int allFiles = files.Count();
             if (allFiles < 1) return;
+
             pixelData = new float[allFiles * width * height];
+            pixels = new float[allFiles * width * height];
 
             foreach (string file in lof)
             {
@@ -710,6 +747,7 @@ namespace Project_DICOM
                 LoadFile(fileBytes);
                 countFiles += 1;
             }
+            
             SetSliders();
             DrawImages();
         }
