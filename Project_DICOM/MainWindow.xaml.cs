@@ -301,29 +301,6 @@ namespace Project_DICOM
             return new string(buffer);
         }
 
-        public byte GetColor(int i, int j, int k, int sliderL, int sliderW)
-        {
-            float color = pixelData[i * width * height + j * width + k] * rescaleSlope + rescaleIntercept;
-            float center = windowCenter - 0.5f + sliderL;
-            float range = windowWidth - 1.0f + sliderW;
-            byte min = 0;
-            byte max = 255;
-
-            // Wzory z dokumentacji
-            if (color <= (center - range / 2.0f))
-            {
-                return min;
-            }
-            else if (color > (center + range / 2.0f))
-            {
-                return max;
-            }
-            else
-            {
-                return (byte)(((color - center) / range + 0.5f) * (max - min) + min);
-            }
-        }
-
         public void SetSliders()
         {
             slider1.Maximum = countFiles - 1;
@@ -409,6 +386,30 @@ namespace Project_DICOM
             DrawImage2();
             DrawImage3();
         }
+
+        public byte GetColor(int i, int j, int k, int sliderL, int sliderW)
+        {
+            float color = pixelData[i * width * height + j * width + k] * rescaleSlope + rescaleIntercept;
+            float center = windowCenter - 0.5f + sliderL;
+            float range = windowWidth - 1.0f + sliderW;
+            byte min = 0;
+            byte max = 255;
+
+            // Wzory z dokumentacji
+            if (color <= (center - range / 2.0f))
+            {
+                return min;
+            }
+            else if (color > (center + range / 2.0f))
+            {
+                return max;
+            }
+            else
+            {
+                return (byte)(((color - center) / range + 0.5f) * (max - min) + min);
+            }
+        }
+
         public void FillPixels()
         {
             pixels = new byte[countFiles * width * height];
@@ -511,7 +512,6 @@ namespace Project_DICOM
                 {
                     label1.Content = distance.ToString("F2") + " mm";
                 }
-                
             }
         }
 
@@ -622,6 +622,9 @@ namespace Project_DICOM
                 spot3.X2 = point.Y + 2;
                 spot3.Y2 = 512;
 
+                slider2.Value = (int)slider1.Value * 512.0 / 112.0;
+                slider3.Value = (int)slider1.Value * 512.0 / 112.0;
+
                 spot1.Visibility = Visibility.Visible;
                 spot2.Visibility = Visibility.Visible;
                 spot3.Visibility = Visibility.Visible;
@@ -655,6 +658,9 @@ namespace Project_DICOM
                 spot3.X2 = 512;
                 spot3.Y2 = point.Y + 2;
 
+                slider1.Value = (int)slider2.Value * 112.0 / 512.0;
+                slider3.Value = slider2.Value;
+
                 spot1.Visibility = Visibility.Visible;
                 spot2.Visibility = Visibility.Visible;
                 spot3.Visibility = Visibility.Visible;
@@ -687,6 +693,9 @@ namespace Project_DICOM
                 spot3.Y1 = point.Y - 2;
                 spot3.X2 = point.X + 2;
                 spot3.Y2 = point.Y + 2;
+
+                slider1.Value = (int)slider3.Value * 112.0 / 512.0;
+                slider2.Value = slider3.Value;
 
                 spot1.Visibility = Visibility.Visible;
                 spot2.Visibility = Visibility.Visible;
