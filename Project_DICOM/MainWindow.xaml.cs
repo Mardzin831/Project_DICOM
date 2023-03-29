@@ -94,7 +94,7 @@ namespace Project_DICOM
             }
 
             int ignore;
-            int count;
+            int length;
             int tagGroup;
             int tagNumber;
 
@@ -113,42 +113,43 @@ namespace Project_DICOM
 
                     if (valueReps.Contains(vr))
                     {
-                        count = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
+                        length = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
                         ignore += 4;
                     }
                     else
                     {
-                        count = (bytes[i + 7] << 8) + bytes[i + 6];
+                        length = (bytes[i + 7] << 8) + bytes[i + 6];
                     }
-                    ignore += 2 + count;
+                    ignore += 2 + length;
 
                     // (0028,0010) Rows
                     if (tagGroup == 0x0028 && tagNumber == 0x0010)
                     {
-                        rows = (bytes[i + ignore - count + 1] << 8) + bytes[i + ignore - count];
+                        rows = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
                     }
 
                     // (0028,0011) Columns
                     if (tagGroup == 0x0028 && tagNumber == 0x0011)
                     {
-                        cols = (bytes[i + ignore - count + 1] << 8) + bytes[i + ignore - count];
+                        cols = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
                     }
 
                     // (0028,0101) Bits Stored
                     if (tagGroup == 0x0028 && tagNumber == 0x0101)
                     {
-                        bitsStored = (bytes[i + ignore - count + 1] << 8) + bytes[i + ignore - count];
+                        bitsStored = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
                     }
 
                     // (0028,0100) Bits Allocated
                     if (tagGroup == 0x0028 && tagNumber == 0x0100)
                     {
-                        bitsAllocated = (bytes[i + ignore - count + 1] << 8) + bytes[i + ignore - count];
+                        bitsAllocated = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
                     }
+
                     // (0028,1053) Rescale Slope
                     if (tagGroup == 0x0028 && tagNumber == 0x1053)
                     {
-                        string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
+                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
                         var parts = buffer.Split('\\');
                         float a = float.Parse(parts[0], nfi);
 
@@ -158,7 +159,7 @@ namespace Project_DICOM
                     // (0028,1052) Rescale Intercept
                     if (tagGroup == 0x0028 && tagNumber == 0x1052)
                     {
-                        string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
+                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
                         var parts = buffer.Split('\\');
                         float a = float.Parse(parts[0], nfi);
 
@@ -168,7 +169,7 @@ namespace Project_DICOM
                     // (0028,0030) Pixel Spacing [2]
                     if (tagGroup == 0x0028 && tagNumber == 0x0030)
                     {
-                        string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
+                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
                         var parts = buffer.Split('\\');
                         float a = float.Parse(parts[0], nfi);
                         float b = float.Parse(parts[1], nfi);
@@ -180,7 +181,7 @@ namespace Project_DICOM
                     //(0018,0050) Slice Thickness
                     if (tagGroup == 0x0018 && tagNumber == 0x0050)
                     {
-                        string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
+                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
                         float a = float.Parse(buffer, nfi);
 
                         sliceThickness = a;
@@ -189,7 +190,7 @@ namespace Project_DICOM
                     // (0020,0032) Image Position (Patient) [3]
                     if (tagGroup == 0x0020 && tagNumber == 0x0032)
                     {
-                        string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
+                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
                         var parts = buffer.Split('\\');
 
                         float a = float.Parse(parts[0], nfi);
@@ -204,7 +205,7 @@ namespace Project_DICOM
                     // (0028,1050) Window Center
                     if (tagGroup == 0x0028 && tagNumber == 0x1050)
                     {
-                        string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
+                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
                         var parts = buffer.Split('\\');
                         float a = float.Parse(parts[0], nfi);
 
@@ -214,7 +215,7 @@ namespace Project_DICOM
                     // (0028,1051) Window Width
                     if (tagGroup == 0x0028 && tagNumber == 0x1051)
                     {
-                        string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
+                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
                         var parts = buffer.Split('\\');
                         float a = float.Parse(parts[0], nfi);
 
@@ -224,17 +225,17 @@ namespace Project_DICOM
                     // (0020,1041) Slice Location
                     if (tagGroup == 0x0020 && tagNumber == 0x1041)
                     {
-                        string buffer = CheckPattern(bytes, i + ignore - count, i + ignore);
+                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
                         var parts = buffer.Split('\\');
                         float a = float.Parse(parts[0], nfi);
 
                         sliceLocation = a;
                     }
-
+           
                     // (7fe0,0010) Pixel Data
                     if (tagGroup == 0x7fe0 && tagNumber == 0x0010)
                     {
-                        i += ignore - count;
+                        i += ignore - length;
                         break;
                     }
                 }
@@ -254,25 +255,24 @@ namespace Project_DICOM
 
                     if (valueReps.Contains(vr))
                     {
-                        count = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
+                        length = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
                         ignore += 4;
                     }
                     else
                     {
-                        count = (bytes[i + 7] << 8) + bytes[i + 6];
+                        length = (bytes[i + 7] << 8) + bytes[i + 6];
                     }
-                    ignore += 2 + count;
+                    ignore += 2 + length;
 
                     // (7fe0,0010) Pixel Data
                     if (tagGroup == 0x7fe0 && tagNumber == 0x0010)
                     {
-                        i += ignore - count;
+                        i += ignore - length;
                         break;
                     }
                 }
             }
             
-
             // Odczytywanie pikseli z plików
             int j = 0, k = 0;
             for (; i < bytes.Length; i += 2, k++)
@@ -286,7 +286,9 @@ namespace Project_DICOM
                 }
             }
         }
-        public string CheckPattern(byte[] bytes, int start, int end)
+
+        // Zwraca string z wartościami dla VR, które są w postaci stringów
+        public string ReturnValues(byte[] bytes, int start, int end)
         {
             char[] buffer = new char[end - start + 1];
             int i = 0;
