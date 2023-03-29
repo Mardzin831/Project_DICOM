@@ -19,7 +19,6 @@ namespace Project_DICOM
         byte[] bitMap1;
         byte[] bitMap2;
         byte[] bitMap3;
-        byte[] pixels;
         int width = 512, height = 512;
         int countFiles;
 
@@ -27,7 +26,7 @@ namespace Project_DICOM
         NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat;
 
         // (7fe0,0010) Pixel Data
-        public int[] pixelData;
+        public float[] pixelData;
 
         // (0028,0010) Rows
         public int rows;
@@ -277,7 +276,25 @@ namespace Project_DICOM
             int j = 0, k = 0;
             for (; i < bytes.Length; i += 2, k++)
             {
-                pixelData[countFiles * width * height + j * width + k] = ((bytes[i + 1]) << 8) + bytes[i];
+                float color = (((bytes[i + 1]) << 8) + bytes[i]) * rescaleSlope + rescaleIntercept;
+                float center = windowCenter - 0.5f;
+                float range = windowWidth - 1.0f;
+                byte min = 0;
+                byte max = 255;
+
+                // Wzory z dokumentacji
+                if (color <= (center - range / 2.0f))
+                {
+                    pixelData[countFiles * width * height + j * width + k] = min;
+                }
+                else if (color > (center + range / 2.0f))
+                {
+                    pixelData[countFiles * width * height + j * width + k] = max;
+                }
+                else
+                {
+                    pixelData[countFiles * width * height + j * width + k] = ((color - center) / range + 0.5f) * (max - min) + min;
+                }
 
                 if (k == width)
                 {
@@ -318,13 +335,12 @@ namespace Project_DICOM
             int stride = (width * pf.BitsPerPixel + 7) / 8;
             int sliderValue = (int)slider1.Value;
             bitMap1 = new byte[stride * height];
-            FillPixels();
 
             Parallel.For(0, width, i =>
             {
                 for (int j = 0; j < height; j++)
                 {
-                    SetBitMap(bitMap1, i, j, pixels[sliderValue * width * height + i * height + j]);
+                    SetBitMap(bitMap1, i, j, pixelData[sliderValue * width * height + i * height + j]);
                 }
             });
 
@@ -340,13 +356,12 @@ namespace Project_DICOM
             int stride = (width * pf.BitsPerPixel + 7) / 8;
             int sliderValue = (int)slider2.Value;
             bitMap2 = new byte[stride * height];
-            FillPixels();
-            
+
             Parallel.For(0, countFiles, i =>
             {
                 for (int j = 0; j < height; j++)
                 {
-                    SetBitMap(bitMap2, countFiles - 1 - i, j, pixels[i * width * height + sliderValue * width + j]);
+                    SetBitMap(bitMap2, countFiles - 1 - i, j, pixelData[i * width * height + sliderValue * width + j]);
                 }
             });
             BitmapSource bs = BitmapSource.Create(width, countFiles, 96d, 96d, pf, null, bitMap2, stride);
@@ -363,13 +378,12 @@ namespace Project_DICOM
             int stride = (width * pf.BitsPerPixel + 7) / 8;
             int sliderValue = (int)slider3.Value;
             bitMap3 = new byte[stride * height];
-            FillPixels();
 
             Parallel.For(0, countFiles, i =>
             {
                 for (int j = 0; j < width; j++)
                 {
-                    SetBitMap(bitMap3, countFiles - 1 - i, j, pixels[i * width * height + j * width + sliderValue]);
+                    SetBitMap(bitMap3, countFiles - 1 - i, j, pixelData[i * width * height + j * width + sliderValue]);
                 }
             });
 
@@ -387,52 +401,11 @@ namespace Project_DICOM
             DrawImage3();
         }
 
-        public byte GetColor(int i, int j, int k, int sliderL, int sliderW)
+        public void SetBitMap(byte[] bitMap, int x, int y, float color)
         {
-            float color = pixelData[i * width * height + j * width + k] * rescaleSlope + rescaleIntercept;
-            float center = windowCenter - 0.5f + sliderL;
-            float range = windowWidth - 1.0f + sliderW;
-            byte min = 0;
-            byte max = 255;
-
-            // Wzory z dokumentacji
-            if (color <= (center - range / 2.0f))
-            {
-                return min;
-            }
-            else if (color > (center + range / 2.0f))
-            {
-                return max;
-            }
-            else
-            {
-                return (byte)(((color - center) / range + 0.5f) * (max - min) + min);
-            }
-        }
-
-        public void FillPixels()
-        {
-            pixels = new byte[countFiles * width * height];
-            int sliderL = (int)sliderLevel.Value;
-            int sliderW = (int)sliderWidth.Value;
-
-            Parallel.For(0, countFiles, i =>
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    Parallel.For(0, height, k =>
-                    {
-                        pixels[i * width * height + j * width + k] = GetColor(i, j, k, sliderL, sliderW);
-                    });
-                }
-            });
-        }
-
-        public void SetBitMap(byte[] bitMap, int x, int y, byte color)
-        {
-            bitMap[512 * 4 * x + 4 * y] = color;
-            bitMap[512 * 4 * x + 4 * y + 1] = color;
-            bitMap[512 * 4 * x + 4 * y + 2] = color;
+            bitMap[512 * 4 * x + 4 * y] = (byte)color;
+            bitMap[512 * 4 * x + 4 * y + 1] = (byte)color;
+            bitMap[512 * 4 * x + 4 * y + 2] = (byte)color;
         }
 
         private void OnSlide1(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -463,7 +436,6 @@ namespace Project_DICOM
         {
             if (countFiles > 0)
             {
-                FillPixels();
                 DrawImages();
             }
         }
@@ -472,7 +444,6 @@ namespace Project_DICOM
         {
             if (countFiles > 0)
             {
-                FillPixels();
                 DrawImages();
             }
         }
@@ -730,7 +701,7 @@ namespace Project_DICOM
             countFiles = 0;
             int allFiles = files.Count();
             if (allFiles < 1) return;
-            pixelData = new int[allFiles * width * height];
+            pixelData = new float[allFiles * width * height];
 
             foreach (string file in lof)
             {
