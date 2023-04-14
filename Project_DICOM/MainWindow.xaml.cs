@@ -709,6 +709,39 @@ namespace Project_DICOM
             }
         }
 
+        private void OnComboBox(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void OnRadioDeafult(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnRadioMean(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnRadioMax(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnRadioHit(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnTextBox(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (int.TryParse(textBox.Text, out int a) == false)
+            {
+                return;
+            }
+
+        }
         private void OnPickFolder(object sender, RoutedEventArgs e)
         {
             string directory = "";
