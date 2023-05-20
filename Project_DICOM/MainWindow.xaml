@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1570">
     <Grid Margin="1" Background="LightSlateGray">
-        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="699,607,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
+        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="629,614,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
         <Border Margin="5,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Grid x:Name="grid1" MouseLeftButtonDown="OnLeftClick1" MouseRightButtonDown="OnRightClick1">
                 <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512" />
@@ -59,13 +59,15 @@
         </Slider>
         <Label Content="Window Level (Center) - Jasność" HorizontalAlignment="Left" Margin="166,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
         <Label Content="Window Width (Range) - Kontrast" HorizontalAlignment="Left" Margin="1078,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
-        <ComboBox x:Name="comboBox" Margin="802,695,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="126" SelectionChanged="OnComboBox"/>
-        <RadioButton x:Name="radioDefault" FontSize="13" Content="Default" HorizontalAlignment="Left" Margin="625,681,0,0" VerticalAlignment="Top" IsChecked="True" Checked="OnRadioDefault"/>
-        <RadioButton x:Name="radioMean" FontSize="13" Content="Mean" HorizontalAlignment="Left" Margin="625,699,0,0" VerticalAlignment="Top" Checked="OnRadioMean"/>
-        <RadioButton x:Name="radioMax" FontSize="13" Content="Max" HorizontalAlignment="Left" Margin="625,719,0,0" VerticalAlignment="Top" Checked="OnRadioMax"/>
-        <RadioButton x:Name="radioHit" FontSize="13" Content="First hit" HorizontalAlignment="Left" Margin="625,737,0,0" VerticalAlignment="Top" Checked="OnRadioHit"/>
-        <Label Content="Widok" FontSize="16" HorizontalAlignment="Left" Margin="625,651,0,0" VerticalAlignment="Top" Height="30" Width="62" HorizontalContentAlignment="Center"/>
-        <Label Content="Filtr" FontSize="16" HorizontalAlignment="Left" Margin="802,662,0,0" VerticalAlignment="Top" Height="30" Width="126" HorizontalContentAlignment="Center"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="20" Margin="699,734,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="31" HorizontalContentAlignment="Center" TextChanged="OnTextBox"/>
+        <ComboBox x:Name="comboBox" Margin="612,720,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="126" SelectionChanged="OnComboBox"/>
+        <Label Content="Widok" FontSize="16" HorizontalAlignment="Left" Margin="645,685,0,0" VerticalAlignment="Top" Height="30" Width="62" HorizontalContentAlignment="Center"/>
+        <Label Content="Przezroczystość" FontSize="16" HorizontalAlignment="Left" Margin="825,603,0,0" VerticalAlignment="Top" Height="30" Width="129" HorizontalContentAlignment="Center"/>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="20" Margin="765,720,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="38" HorizontalContentAlignment="Center" TextChanged="OnTextBox"/>
+        <Label Content="First Hit" FontSize="13" HorizontalAlignment="Left" Margin="755,691,0,0" VerticalAlignment="Top" Height="24" Width="56" HorizontalContentAlignment="Center"/>
+        <Slider x:Name="sliderTransparent" HorizontalAlignment="Left" Margin="873,636,0,0" VerticalAlignment="Top" Width="27" ValueChanged="OnSlideTransparent" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="0" Maximum="100" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True" Orientation="Vertical" Height="76">
+            <Slider.LayoutTransform>
+                <ScaleTransform ScaleY="1.5"/>
+            </Slider.LayoutTransform>
+        </Slider>
     </Grid>
 </Window>

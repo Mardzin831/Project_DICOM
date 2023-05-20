@@ -23,8 +23,7 @@ namespace Project_DICOM
         int countFiles = 0;
         public float[] pixels;
 
-        string view = "Default";
-        string filter = "none";
+        string view = "None";
         int hits = 0;
 
         List<string> valueReps = new List<string>() { "OB", "OW", "SQ" };
@@ -75,9 +74,11 @@ namespace Project_DICOM
             RenderOptions.SetBitmapScalingMode(Image1, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(Image2, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(Image3, BitmapScalingMode.NearestNeighbor);
-            comboBox.Items.Add("none");
-            comboBox.Items.Add("square");
-            comboBox.SelectedItem = "none";
+            comboBox.Items.Add("None");
+            comboBox.Items.Add("Mip");
+            comboBox.Items.Add("Avg");
+            comboBox.Items.Add("FirstHit");
+            comboBox.SelectedItem = "None";
         }
 
         public void LoadFile(byte[] bytes)
@@ -459,32 +460,6 @@ namespace Project_DICOM
             return bitMap[512 * 4 * x + 4 * y];
         }
 
-        public byte UseFilter(byte[] bitMap, int x, int y)
-        {
-            if(filter == "square")
-            {
-                float[,] filter = new float[,] { { 1, 1, 1, 1, 1}, { 1, 1, 1, 1, 1}, { 1, 1, 1, 1, 1}, { 1, 1, 1, 1, 1}, { 1, 1, 1, 1, 1} };
-                int halfFilterSize = 2;
-                int filterSize = 5;
-                float filterSum = 25;
-                float color = 0;
-
-                if (x - halfFilterSize >= 0 && x + halfFilterSize < 512 && y - halfFilterSize >= 0 && y + halfFilterSize < 512)
-                {
-                    for (int i = 0; i < filterSize; i++)
-                    {
-                        for (int j = 0; j < filterSize; j++)
-                        {
-                            color = color + filter[i,j] * GetPixel(bitMap, x - halfFilterSize + i, y - halfFilterSize + j);
-                        }
-                    }
-                    return (byte)(color / filterSum);
-                }
-            }
-
-            return GetPixel(bitMap, x, y);
-        }
-
         private void OnSlide1(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if(countFiles > 0)
@@ -753,56 +728,8 @@ namespace Project_DICOM
 
         private void OnComboBox(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            filter = comboBox.SelectedItem.ToString();
+            view = comboBox.SelectedItem.ToString();
             DrawImages();
-        }
-
-        private void OnRadioDefault(object sender, RoutedEventArgs e)
-        {
-            if((bool)radioDefault.IsChecked) 
-            {
-                view = "Default";
-                DrawImages();
-                slider1.IsEnabled = true;
-                slider2.IsEnabled = true;
-                slider3.IsEnabled = true;
-            }
-        }
-
-        private void OnRadioMean(object sender, RoutedEventArgs e)
-        {
-            if ((bool)radioMean.IsChecked)
-            {
-                view = "Mean";
-                DrawImages();
-                slider1.IsEnabled = false;
-                slider2.IsEnabled = false;
-                slider3.IsEnabled = false;
-            }
-        }
-
-        private void OnRadioMax(object sender, RoutedEventArgs e)
-        {
-            if ((bool)radioMax.IsChecked)
-            {
-                view = "Max";
-                DrawImages();
-                slider1.IsEnabled = false;
-                slider2.IsEnabled = false;
-                slider3.IsEnabled = false;
-            }
-        }
-
-        private void OnRadioHit(object sender, RoutedEventArgs e)
-        {
-            if ((bool)radioHit.IsChecked)
-            {
-                view = "Hit";
-                DrawImages();
-                slider1.IsEnabled = false;
-                slider2.IsEnabled = false;
-                slider3.IsEnabled = false;
-            }
         }
 
         private void OnTextBox(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -818,6 +745,12 @@ namespace Project_DICOM
             }
 
         }
+
+        private void OnSlideTransparent(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+        }
+
         private void OnPickFolder(object sender, RoutedEventArgs e)
         {
             string directory = "";
