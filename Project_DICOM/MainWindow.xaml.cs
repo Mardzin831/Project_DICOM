@@ -24,6 +24,7 @@ namespace Project_DICOM
         public float[] pixels;
 
         string view = "None";
+        int isView = 0;
         int hits = 0;
 
         List<string> valueReps = new List<string>() { "OB", "OW", "SQ" };
@@ -359,7 +360,6 @@ namespace Project_DICOM
                 }
             }
         }
-
         public void SetSliders()
         {
             slider1.Maximum = countFiles - 1;
@@ -371,20 +371,33 @@ namespace Project_DICOM
             slider3.Value = 0;
         }
 
-        public void DrawImage1()
+        public void DrawImage1(float[] viewPixels)
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
             int sliderValue = (int)slider1.Value;
             bitMap1 = new byte[stride * height];
 
-            Parallel.For(0, width, i =>
+            if(isView == 0)
             {
-                for (int j = 0; j < height; j++)
+                Parallel.For(0, width, i =>
                 {
-                    SetBitMap(bitMap1, i, j, pixelData[sliderValue * width * height + i * height + j]);
-                }
-            });
+                    for (int j = 0; j < height; j++)
+                    {
+                        SetBitMap(bitMap1, i, j, viewPixels[sliderValue * width * height + i * height + j]);
+                    }
+                });
+            }
+            else
+            {
+                Parallel.For(0, width, i =>
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        SetBitMap(bitMap1, i, j, viewPixels[i * height + j]);
+                    }
+                });
+            }
 
             BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap1, stride);
 
@@ -392,20 +405,33 @@ namespace Project_DICOM
             //    new ScaleTransform(1, 1));
             Image1.Source = bs;
         }
-        public void DrawImage2()
+        public void DrawImage2(float[] viewPixels)
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
             int sliderValue = (int)slider2.Value;
             bitMap2 = new byte[stride * height];
 
-            Parallel.For(0, countFiles, i =>
+            if (isView == 0)
             {
-                for (int j = 0; j < height; j++)
+                Parallel.For(0, countFiles, i =>
                 {
-                    SetBitMap(bitMap2, countFiles - 1 - i, j, pixelData[i * width * height + sliderValue * width + j]);
-                }
-            });
+                    for (int j = 0; j < height; j++)
+                    {
+                        SetBitMap(bitMap2, countFiles - 1 - i, j, viewPixels[i * width * height + sliderValue * width + j]);
+                    }
+                });
+            }
+            else
+            {
+                Parallel.For(0, countFiles, i =>
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        SetBitMap(bitMap2, countFiles - 1 - i, j, viewPixels[j * countFiles + i]);
+                    }
+                });
+            }
             BitmapSource bs = BitmapSource.Create(width, countFiles, 96d, 96d, pf, null, bitMap2, stride);
 
             CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
@@ -414,20 +440,33 @@ namespace Project_DICOM
             Image2.Source = bitmap;
         }
 
-        public void DrawImage3()
+        public void DrawImage3(float[] viewPixels)
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
             int sliderValue = (int)slider3.Value;
             bitMap3 = new byte[stride * height];
 
-            Parallel.For(0, countFiles, i =>
+            if (isView == 0)
             {
-                for (int j = 0; j < width; j++)
+                Parallel.For(0, countFiles, i =>
                 {
-                    SetBitMap(bitMap3, countFiles - 1 - i, j, pixelData[i * width * height + j * width + sliderValue]);
-                }
-            });
+                    for (int j = 0; j < width; j++)
+                    {
+                        SetBitMap(bitMap3, countFiles - 1 - i, j, viewPixels[i * width * height + j * width + sliderValue]);
+                    }
+                });
+            }
+            else
+            {
+                Parallel.For(0, countFiles, i =>
+                {
+                    for (int j = 0; j < width; j++)
+                    {
+                        SetBitMap(bitMap3, countFiles - 1 - i, j, viewPixels[j * countFiles + i]);
+                    }
+                });
+            }
 
             BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap3, stride);
             
@@ -443,9 +482,130 @@ namespace Project_DICOM
                 return;
             }
             SetColors();
-            DrawImage1();
-            DrawImage2();
-            DrawImage3();
+
+            if (view == "None")
+            {
+                isView = 0;
+                DrawImage1(pixelData);
+                DrawImage2(pixelData);
+                DrawImage3(pixelData);
+            }
+            else
+            {
+                float[] pixels1 = new float[width * height];
+                float[] pixels2 = new float[width * countFiles];
+                float[] pixels3 = new float[height * countFiles];
+                bool[] firstHit1 = new bool[width * height];
+                bool[] firstHit2 = new bool[width * countFiles];
+                bool[] firstHit3 = new bool[height * countFiles];
+
+                isView = 1;
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        pixels1[i * height + j] = 0;
+                        firstHit1[i * height + j] = false;
+                    }
+                    for (int j = 0; j < countFiles; j++)
+                    {
+                        pixels2[i * countFiles + j] = 0;
+                        firstHit2[i * countFiles + j] = false;
+                    }
+                    for (int j = 0; j < countFiles; j++)
+                    {
+                        pixels3[i * countFiles + j] = 0;
+                        firstHit3[i * countFiles + j] = false;
+                    }
+                }
+
+                if (view == "Mip")
+                {
+                    for (int i = 0; i < countFiles; i++)
+                    {
+                        for (int j = 0; j < width; j++)
+                        {
+                            for (int k = 0; k < height; k++)
+                            {
+                                pixels1[j * height + k] = Math.Max(pixels1[j * height + k], pixelData[i * width * height + j * width + k]);
+                                pixels2[k * countFiles + i] = Math.Max(pixels2[k * countFiles + i], pixelData[i * width * height + j * width + k]);
+                                pixels3[j * countFiles + i] = Math.Max(pixels3[j * countFiles + i], pixelData[i * width * height + j * width + k]);
+                            }
+                        }
+                    }
+                }
+
+                if (view == "Avg")
+                {
+                    for (int i = 0; i < countFiles; i++)
+                    {
+                        for (int j = 0; j < width; j++)
+                        {
+                            for (int k = 0; k < height; k++)
+                            {
+                                pixels1[j * height + k] = pixels1[j * height + k] + pixelData[i * width * height + j * width + k];
+                                pixels2[k * countFiles + i] = pixels2[k * countFiles + i] + pixelData[i * width * height + j * width + k];
+                                pixels3[j * countFiles + i] = pixels3[j * countFiles + i] + pixelData[i * width * height + j * width + k]; 
+                            }
+                        }
+                    }
+                    for (int i = 0; i < width; i++)
+                    {
+                        for (int j = 0; j < height; j++)
+                        {
+                            pixels1[i * height + j] = pixels1[i * height + j] / countFiles;
+                        }
+                    }
+                    for (int i = 0; i < countFiles; i++)
+                    {
+                        for (int j = 0; j < width; j++)
+                        {
+                            pixels2[j * countFiles + i] = pixels2[j * countFiles + i] / width;
+                        }
+                    }
+                    for (int i = 0; i < countFiles; i++)
+                    {
+                        for (int j = 0; j < height; j++)
+                        {
+                            pixels3[j * countFiles + i] = pixels3[j * countFiles + i] / height;
+                        }
+                    }
+                }
+
+                if (view == "FirstHit")
+                {
+                    for (int i = 0; i < countFiles; i++)
+                    {
+                        for (int j = 0; j < width; j++)
+                        {
+                            for (int k = 0; k < height; k++)
+                            {
+                                if (!firstHit1[j * height + k] && hits < pixelData[i * width * height + j * width + k])
+                                {
+                                    pixels1[j * height + k] = pixelData[i * width * height + j * width + k];
+                                    firstHit1[j * height + k] = true;
+                                }
+
+                                if (!firstHit2[k * countFiles + i] && hits < pixelData[i * width * height + j * width + k])
+                                {
+                                    pixels2[k * countFiles + i] = pixelData[i * width * height + j * width + k];
+                                    firstHit2[k * countFiles + i] = true;
+                                }
+
+                                if (!firstHit3[j * countFiles + i] && hits < pixelData[i * width * height + j * width + k])
+                                {
+                                    pixels3[j * countFiles + i] = pixelData[i * width * height + j * width + k];
+                                    firstHit3[j * countFiles + i] = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                DrawImage1(pixels1);
+                DrawImage2(pixels2);
+                DrawImage3(pixels3);
+            }
         }
 
         public void SetBitMap(byte[] bitMap, int x, int y, float color)
@@ -455,16 +615,11 @@ namespace Project_DICOM
             bitMap[512 * 4 * x + 4 * y + 2] = (byte)color;
         }
 
-        public byte GetPixel(byte[] bitMap, int x, int y)
-        {
-            return bitMap[512 * 4 * x + 4 * y];
-        }
-
         private void OnSlide1(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if(countFiles > 0)
             {
-                DrawImage1();
+                DrawImage1(pixelData);
             }
         }
 
@@ -472,7 +627,7 @@ namespace Project_DICOM
         {
             if (countFiles > 0)
             {
-                DrawImage2();
+                DrawImage2(pixelData);
             }
         }
 
@@ -480,7 +635,7 @@ namespace Project_DICOM
         {
             if (countFiles > 0)
             {
-                DrawImage3();
+                DrawImage3(pixelData);
             }
         }
 
@@ -730,6 +885,18 @@ namespace Project_DICOM
         {
             view = comboBox.SelectedItem.ToString();
             DrawImages();
+            if(view == "None")
+            {
+                slider1.IsEnabled = true;
+                slider2.IsEnabled = true;
+                slider3.IsEnabled = true;
+            }
+            else
+            {
+                slider1.IsEnabled = false;
+                slider2.IsEnabled = false;
+                slider3.IsEnabled = false;
+            }
         }
 
         private void OnTextBox(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -739,7 +906,7 @@ namespace Project_DICOM
                 return;
             }
             hits = val;
-            if(view == "Hit")
+            if(view == "FirstHit")
             {
                 DrawImages();
             }
