@@ -111,7 +111,7 @@ namespace Project_DICOM
             {
                 for (i += 4; i < bytes.Length; i += ignore)
                 {
-                    tagGroup = (ushort)((0xff & bytes[i + 1] << 8) + (0xff & bytes[i]));
+                    tagGroup = (ushort)(((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i]));
                     tagNumber = (ushort)((bytes[i + 3] << 8) + bytes[i + 2]);
 
                     ignore = 6;
@@ -253,7 +253,7 @@ namespace Project_DICOM
             {
                 for (i += 4; i < bytes.Length; i += ignore)
                 {
-                    tagGroup = (ushort)((bytes[i + 1] << 8) + bytes[i]);
+                    tagGroup = (ushort)(((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i]));
                     tagNumber = (ushort)((bytes[i + 3] << 8) + bytes[i + 2]);
 
                     ignore = 6;
@@ -283,10 +283,10 @@ namespace Project_DICOM
             }
             
             // Odczytywanie pikseli z plików
-            int j = 0, k = 0;
+            uint j = 0, k = 0;
             for (; i < bytes.Length; i += 2, k++)
             {
-                float color = (((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i])) * rescaleSlope + rescaleIntercept;
+                float color = (short)(((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i])) * rescaleSlope + rescaleIntercept;
                 float center = windowCenter - 0.5f;
                 float range = windowWidth - 1.0f;
                 byte min = 0;
@@ -295,11 +295,11 @@ namespace Project_DICOM
                 // Wzory z dokumentacji
                 if (color <= (center - range / 2.0f))
                 {
-                    pixelData[countFiles * width * height + j * width + k] = min;
+                    pixelData[countFiles * width * height + j * width + k] = (short)min;
                 }
                 else if (color > (center + range / 2.0f))
                 {
-                    pixelData[countFiles * width * height + j * width + k] = max;
+                    pixelData[countFiles * width * height + j * width + k] = (short)max;
                 }
                 else
                 {
