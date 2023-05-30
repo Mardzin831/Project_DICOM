@@ -21,7 +21,7 @@ namespace Project_DICOM
         byte[] bitMap3;
         int width = 512, height = 512;
         int countFiles = 0;
-        public uint[] pixels;
+        public float[] pixels;
 
         string view = "None";
         int isView = 0;
@@ -31,19 +31,19 @@ namespace Project_DICOM
         NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat;
 
         // (7fe0,0010) Pixel Data
-        public short[] pixelData;
+        public float[] pixelData;
 
         // (0028,0010) Rows
-        public ushort rows;
+        public int rows;
 
         // (0028,0011) Columns
-        public ushort cols;
+        public int cols;
 
         // (0028,0101) Bits Stored
-        public ushort bitsStored;
+        public int bitsStored;
 
         // (0028,0100) Bits Allocated
-        public ushort bitsAllocated;
+        public int bitsAllocated;
 
         // (0028,1053) Rescale Slope
         public float rescaleSlope;
@@ -85,7 +85,7 @@ namespace Project_DICOM
         public void LoadFile(byte[] bytes)
         {
             bool found = false;
-            uint i;
+            int i;
 
             // Szukanie DICM
             for (i = 0; i + 3 < bytes.Length; i += 4)
@@ -102,17 +102,17 @@ namespace Project_DICOM
                 return;
             }
 
-            uint ignore;
-            uint length;
-            ushort tagGroup;
-            ushort tagNumber;
+            int ignore;
+            int length;
+            int tagGroup;
+            int tagNumber;
 
-            if(countFiles == 0)
+            if (countFiles == 0)
             {
                 for (i += 4; i < bytes.Length; i += ignore)
                 {
-                    tagGroup = (ushort)(((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i]));
-                    tagNumber = (ushort)((bytes[i + 3] << 8) + bytes[i + 2]);
+                    tagGroup = (bytes[i + 1] << 8) + bytes[i];
+                    tagNumber = (bytes[i + 3] << 8) + bytes[i + 2];
 
                     ignore = 6;
 
@@ -122,37 +122,37 @@ namespace Project_DICOM
 
                     if (valueReps.Contains(vr))
                     {
-                        length = (uint)((bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8]);
+                        length = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
                         ignore += 4;
                     }
                     else
                     {
-                        length = (ushort)((bytes[i + 7] << 8) + bytes[i + 6]);
+                        length = (bytes[i + 7] << 8) + bytes[i + 6];
                     }
                     ignore += 2 + length;
 
                     // (0028,0010) Rows
                     if (tagGroup == 0x0028 && tagNumber == 0x0010)
                     {
-                        rows = (ushort)((bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length]);
+                        rows = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
                     }
 
                     // (0028,0011) Columns
                     if (tagGroup == 0x0028 && tagNumber == 0x0011)
                     {
-                        cols = (ushort)((bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length]);
+                        cols = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
                     }
 
                     // (0028,0101) Bits Stored
                     if (tagGroup == 0x0028 && tagNumber == 0x0101)
                     {
-                        bitsStored = (ushort)((bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length]);
+                        bitsStored = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
                     }
 
                     // (0028,0100) Bits Allocated
                     if (tagGroup == 0x0028 && tagNumber == 0x0100)
                     {
-                        bitsAllocated = (ushort)((bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length]);
+                        bitsAllocated = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
                     }
 
                     // (0028,1053) Rescale Slope
@@ -240,7 +240,7 @@ namespace Project_DICOM
 
                         sliceLocation = a;
                     }
-           
+
                     // (7fe0,0010) Pixel Data
                     if (tagGroup == 0x7fe0 && tagNumber == 0x0010)
                     {
@@ -253,8 +253,8 @@ namespace Project_DICOM
             {
                 for (i += 4; i < bytes.Length; i += ignore)
                 {
-                    tagGroup = (ushort)(((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i]));
-                    tagNumber = (ushort)((bytes[i + 3] << 8) + bytes[i + 2]);
+                    tagGroup = (bytes[i + 1] << 8) + bytes[i];
+                    tagNumber = (bytes[i + 3] << 8) + bytes[i + 2];
 
                     ignore = 6;
 
@@ -264,12 +264,12 @@ namespace Project_DICOM
 
                     if (valueReps.Contains(vr))
                     {
-                        length = (ushort)((bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8]);
+                        length = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
                         ignore += 4;
                     }
                     else
                     {
-                        length = (ushort)((bytes[i + 7] << 8) + bytes[i + 6]);
+                        length = (bytes[i + 7] << 8) + bytes[i + 6];
                     }
                     ignore += 2 + length;
 
@@ -281,12 +281,12 @@ namespace Project_DICOM
                     }
                 }
             }
-            
+
             // Odczytywanie pikseli z plików
-            uint j = 0, k = 0;
+            int j = 0, k = 0;
             for (; i < bytes.Length; i += 2, k++)
             {
-                float color = (short)(((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i])) * rescaleSlope + rescaleIntercept;
+                float color = (short)(((bytes[i + 1]) << 8) + bytes[i]) * rescaleSlope + rescaleIntercept;
                 float center = windowCenter - 0.5f;
                 float range = windowWidth - 1.0f;
                 byte min = 0;
@@ -295,18 +295,18 @@ namespace Project_DICOM
                 // Wzory z dokumentacji
                 if (color <= (center - range / 2.0f))
                 {
-                    pixelData[countFiles * width * height + j * width + k] = (short)min;
+                    pixelData[countFiles * width * height + j * width + k] = min;
                 }
                 else if (color > (center + range / 2.0f))
                 {
-                    pixelData[countFiles * width * height + j * width + k] = (short)max;
+                    pixelData[countFiles * width * height + j * width + k] = max;
                 }
                 else
                 {
-                    pixelData[countFiles * width * height + j * width + k] = (short)(((color - center) / range + 0.5f) * (max - min) + min);
+                    pixelData[countFiles * width * height + j * width + k] = ((color - center) / range + 0.5f) * (max - min) + min;
                 }
 
-                pixels[countFiles * width * height + j * width + k] = (uint)(((0xff & bytes[i + 1]) << 8) + (0xff & bytes[i]));
+                pixels[countFiles * width * height + j * width + k] = ((bytes[i + 1]) << 8) + bytes[i];
                 if (k == width)
                 {
                     k = 0;
@@ -316,7 +316,7 @@ namespace Project_DICOM
         }
 
         // Zwraca string z wartościami dla VR, które są w postaci stringów
-        public string ReturnValues(byte[] bytes, uint start, uint end)
+        public string ReturnValues(byte[] bytes, int start, int end)
         {
             char[] buffer = new char[end - start + 1];
             int i = 0;
@@ -325,7 +325,7 @@ namespace Project_DICOM
                 buffer[i] = (char)bytes[start];
                 i++;
             }
-            
+
             return new string(buffer);
         }
 
@@ -333,11 +333,11 @@ namespace Project_DICOM
         {
             for (int i = 0; i < countFiles; i++)
             {
-                for(int j = 0; j < width; j++)
+                for (int j = 0; j < width; j++)
                 {
-                    for(int k = 0; k < height; k++)
+                    for (int k = 0; k < height; k++)
                     {
-                        float color = pixels[i * width * height + j * width + k] * rescaleSlope + rescaleIntercept;
+                        float color = (short)pixels[i * width * height + j * width + k] * rescaleSlope + rescaleIntercept;
                         float center = windowCenter - 0.5f + (int)sliderLevel.Value;
                         float range = windowWidth - 1.0f + (int)sliderWidth.Value;
                         byte min = 0;
@@ -354,7 +354,7 @@ namespace Project_DICOM
                         }
                         else
                         {
-                            pixelData[i * width * height + j * width + k] = (short)(((color - center) / range + 0.5f) * (max - min) + min);
+                            pixelData[i * width * height + j * width + k] = ((color - center) / range + 0.5f) * (max - min) + min;
                         }
                     }
                 }
@@ -371,14 +371,14 @@ namespace Project_DICOM
             slider3.Value = 0;
         }
 
-        public void DrawImage1(short[] viewPixels)
+        public void DrawImage1(float[] viewPixels)
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
             int sliderValue = (int)slider1.Value;
             bitMap1 = new byte[stride * height];
 
-            if(isView == 0)
+            if (isView == 0)
             {
                 Parallel.For(0, width, i =>
                 {
@@ -405,7 +405,7 @@ namespace Project_DICOM
             //    new ScaleTransform(1, 1));
             Image1.Source = bs;
         }
-        public void DrawImage2(short[] viewPixels)
+        public void DrawImage2(float[] viewPixels)
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
@@ -440,7 +440,7 @@ namespace Project_DICOM
             Image2.Source = bitmap;
         }
 
-        public void DrawImage3(short[] viewPixels)
+        public void DrawImage3(float[] viewPixels)
         {
             PixelFormat pf = PixelFormats.Bgr32;
             int stride = (width * pf.BitsPerPixel + 7) / 8;
@@ -469,7 +469,7 @@ namespace Project_DICOM
             }
 
             BitmapSource bs = BitmapSource.Create(width, height, 96d, 96d, pf, null, bitMap3, stride);
-            
+
             CroppedBitmap croppedBitmap = new CroppedBitmap(bs, new Int32Rect(0, 0, width, countFiles));
             var bitmap = new TransformedBitmap(croppedBitmap,
                 new ScaleTransform(1, 512.0 / countFiles));
@@ -477,11 +477,11 @@ namespace Project_DICOM
         }
         public void DrawImages()
         {
-            if(countFiles == 0)
+            if (countFiles == 0)
             {
                 return;
             }
-            //SetColors();
+            SetColors();
 
             if (view == "None")
             {
@@ -545,7 +545,7 @@ namespace Project_DICOM
                             {
                                 pixels1[j * height + k] = pixels1[j * height + k] + pixelData[i * width * height + j * width + k];
                                 pixels2[k * countFiles + i] = pixels2[k * countFiles + i] + pixelData[i * width * height + j * width + k];
-                                pixels3[j * countFiles + i] = pixels3[j * countFiles + i] + pixelData[i * width * height + j * width + k]; 
+                                pixels3[j * countFiles + i] = pixels3[j * countFiles + i] + pixelData[i * width * height + j * width + k];
                             }
                         }
                     }
@@ -602,9 +602,9 @@ namespace Project_DICOM
                     }
                 }
 
-                //DrawImage1(pixels1);
-                //DrawImage2(pixels2);
-                //DrawImage3(pixels3);
+                DrawImage1(pixels1);
+                DrawImage2(pixels2);
+                DrawImage3(pixels3);
             }
         }
 
@@ -617,7 +617,7 @@ namespace Project_DICOM
 
         private void OnSlide1(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if(countFiles > 0)
+            if (countFiles > 0)
             {
                 DrawImage1(pixelData);
             }
@@ -664,7 +664,7 @@ namespace Project_DICOM
                 line1.Visibility = Visibility.Hidden;
                 label1.Visibility = Visibility.Hidden;
             }
-            else if(line1.Visibility == Visibility.Hidden && label1.Visibility == Visibility.Hidden)
+            else if (line1.Visibility == Visibility.Hidden && label1.Visibility == Visibility.Hidden)
             {
                 Point point = e.GetPosition(Image1);
                 line1.X1 = point.X;
@@ -682,7 +682,7 @@ namespace Project_DICOM
 
                 label1.Visibility = Visibility.Visible;
                 label1.Margin = new Thickness((line1.X1 + line1.X2) / 2, (line1.Y1 + line1.Y2) / 2, 0, 0);
-                if(distance >= 10)
+                if (distance >= 10)
                 {
                     label1.Content = (distance / 10).ToString("F2") + " cm";
                 }
@@ -885,7 +885,7 @@ namespace Project_DICOM
         {
             view = comboBox.SelectedItem.ToString();
             DrawImages();
-            if(view == "None")
+            if (view == "None")
             {
                 slider1.IsEnabled = true;
                 slider2.IsEnabled = true;
@@ -906,7 +906,7 @@ namespace Project_DICOM
                 return;
             }
             hits = val;
-            if(view == "FirstHit")
+            if (view == "FirstHit")
             {
                 DrawImages();
             }
@@ -946,17 +946,17 @@ namespace Project_DICOM
             int allFiles = files.Count();
             if (allFiles < 1) return;
 
-            pixelData = new short[allFiles * width * height];
-            pixels = new uint[allFiles * width * height];
+            pixelData = new float[allFiles * width * height];
+            pixels = new float[allFiles * width * height];
 
             foreach (string file in lof)
             {
                 fileBytes = File.ReadAllBytes(file);
-                
+
                 LoadFile(fileBytes);
                 countFiles += 1;
             }
-            
+
             SetSliders();
             DrawImages();
         }
