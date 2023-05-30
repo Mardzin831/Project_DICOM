@@ -286,10 +286,7 @@ namespace Project_DICOM
             int j = 0, k = 0;
             for (; i < bytes.Length; i += 2, k++)
             {
-                
-                short storedValue = (short)(((0xff & (short)bytes[i + 1]) << 8) | (byte)bytes[i]);
-                float color = storedValue * rescaleSlope + rescaleIntercept;
-                //float color = (((bytes[i + 1]) << 8) + bytes[i]) * rescaleSlope + rescaleIntercept;
+                float color = (((bytes[i + 1]) << 8) + bytes[i]) * rescaleSlope + rescaleIntercept;
                 float center = windowCenter - 0.5f;
                 float range = windowWidth - 1.0f;
                 byte min = 0;
@@ -340,9 +337,7 @@ namespace Project_DICOM
                 {
                     for(int k = 0; k < height; k++)
                     {
-                        short storedValue = (short)(((0xff & (short)pixels[i + 1]) << 8) | (byte)bytes[i]);
-                        float color = storedValue * rescaleSlope + rescaleIntercept;
-                        //float color = pixels[i * width * height + j * width + k] * rescaleSlope + rescaleIntercept;
+                        float color = pixels[i * width * height + j * width + k] * rescaleSlope + rescaleIntercept;
                         float center = windowCenter - 0.5f + (int)sliderLevel.Value;
                         float range = windowWidth - 1.0f + (int)sliderWidth.Value;
                         byte min = 0;
