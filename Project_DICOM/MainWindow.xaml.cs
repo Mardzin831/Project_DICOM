@@ -20,54 +20,35 @@ namespace Project_DICOM
         byte[] bitMap2;
         byte[] bitMap3;
         int width = 512, height = 512;
-        int countFiles = 0;
-        public float[] pixels;
+        int countFiles = 247;
+        float[] pixels;
+        bool loaded = false;
 
         string view = "None";
         int isView = 0;
-        int hits = 0;
+        int hits1 = 0;
+        int hits2 = 0;
 
-        List<string> valueReps = new List<string>() { "OB", "OW", "SQ" };
-        NumberFormatInfo nfi = CultureInfo.InvariantCulture.NumberFormat;
+        int l = 0;
 
         // (7fe0,0010) Pixel Data
         public float[] pixelData;
 
-        // (0028,0010) Rows
-        public int rows;
-
-        // (0028,0011) Columns
-        public int cols;
-
-        // (0028,0101) Bits Stored
-        public int bitsStored;
-
-        // (0028,0100) Bits Allocated
-        public int bitsAllocated;
-
         // (0028,1053) Rescale Slope
-        public float rescaleSlope;
+        public float rescaleSlope1 = 1;
+        public float rescaleSlope2 = 1;
 
         // (0028,1052) Rescale Intercept
-        public float rescaleIntercept;
-
-        // (0028,0030) Pixel Spacing [2]
-        public float[] pixelSpacing = new float[2];
-
-        // (0018,0050) Slice Thickness
-        public float sliceThickness;
-
-        // (0020,0032) Image Position (Patient) [3]
-        public float[] imagePosition = new float[3];
+        public float rescaleIntercept1 = -3024;
+        public float rescaleIntercept2 = 0;
 
         // (0028,1050) Window Center
-        public float windowCenter;
+        public float windowCenter1 = 30;
+        public float windowCenter2 = 156;
 
         // (0028,1051) Window Width
-        public float windowWidth;
-
-        // (0020,1041) Slice Location
-        public float sliceLocation;
+        public float windowWidth1 = 300;
+        public float windowWidth2 = 368;
 
         public MainWindow()
         {
@@ -82,209 +63,11 @@ namespace Project_DICOM
             comboBox.SelectedItem = "None";
         }
 
-        public void LoadFile(byte[] bytes)
+        public void LoadFile(byte[] bytes, float rescaleSlope, float rescaleIntercept, float windowCenter, float windowWidth)
         {
-            bool found = false;
-            int i;
-
-            // Szukanie DICM
-            for (i = 0; i + 3 < bytes.Length; i += 4)
-            {
-                if (bytes[i] == 'D' && bytes[i + 1] == 'I' && bytes[i + 2] == 'C' && bytes[i + 3] == 'M')
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                Debug.WriteLine("Brak DICM");
-                return;
-            }
-
-            int ignore;
-            int length;
-            int tagGroup;
-            int tagNumber;
-
-            if (countFiles == 0)
-            {
-                for (i += 4; i < bytes.Length; i += ignore)
-                {
-                    tagGroup = (bytes[i + 1] << 8) + bytes[i];
-                    tagNumber = (bytes[i + 3] << 8) + bytes[i + 2];
-
-                    ignore = 6;
-
-                    string vr = "";
-                    vr += (char)bytes[i + 4];
-                    vr += (char)bytes[i + 5];
-
-                    if (valueReps.Contains(vr))
-                    {
-                        length = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
-                        ignore += 4;
-                    }
-                    else
-                    {
-                        length = (bytes[i + 7] << 8) + bytes[i + 6];
-                    }
-                    ignore += 2 + length;
-
-                    // (0028,0010) Rows
-                    if (tagGroup == 0x0028 && tagNumber == 0x0010)
-                    {
-                        rows = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
-                    }
-
-                    // (0028,0011) Columns
-                    if (tagGroup == 0x0028 && tagNumber == 0x0011)
-                    {
-                        cols = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
-                    }
-
-                    // (0028,0101) Bits Stored
-                    if (tagGroup == 0x0028 && tagNumber == 0x0101)
-                    {
-                        bitsStored = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
-                    }
-
-                    // (0028,0100) Bits Allocated
-                    if (tagGroup == 0x0028 && tagNumber == 0x0100)
-                    {
-                        bitsAllocated = (bytes[i + ignore - length + 1] << 8) + bytes[i + ignore - length];
-                    }
-
-                    // (0028,1053) Rescale Slope
-                    if (tagGroup == 0x0028 && tagNumber == 0x1053)
-                    {
-                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
-                        var parts = buffer.Split('\\');
-                        float a = float.Parse(parts[0], nfi);
-
-                        rescaleSlope = a;
-                    }
-
-                    // (0028,1052) Rescale Intercept
-                    if (tagGroup == 0x0028 && tagNumber == 0x1052)
-                    {
-                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
-                        var parts = buffer.Split('\\');
-                        float a = float.Parse(parts[0], nfi);
-
-                        rescaleIntercept = a;
-                    }
-
-                    // (0028,0030) Pixel Spacing [2]
-                    if (tagGroup == 0x0028 && tagNumber == 0x0030)
-                    {
-                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
-                        var parts = buffer.Split('\\');
-                        float a = float.Parse(parts[0], nfi);
-                        float b = float.Parse(parts[1], nfi);
-
-                        pixelSpacing[0] = a;
-                        pixelSpacing[1] = b;
-                    }
-
-                    //(0018,0050) Slice Thickness
-                    if (tagGroup == 0x0018 && tagNumber == 0x0050)
-                    {
-                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
-                        float a = float.Parse(buffer, nfi);
-
-                        sliceThickness = a;
-                    }
-
-                    // (0020,0032) Image Position (Patient) [3]
-                    if (tagGroup == 0x0020 && tagNumber == 0x0032)
-                    {
-                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
-                        var parts = buffer.Split('\\');
-
-                        float a = float.Parse(parts[0], nfi);
-                        float b = float.Parse(parts[1], nfi);
-                        float c = float.Parse(parts[2], nfi);
-
-                        imagePosition[0] = a;
-                        imagePosition[1] = b;
-                        imagePosition[2] = c;
-                    }
-
-                    // (0028,1050) Window Center
-                    if (tagGroup == 0x0028 && tagNumber == 0x1050)
-                    {
-                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
-                        var parts = buffer.Split('\\');
-                        float a = float.Parse(parts[0], nfi);
-
-                        windowCenter = a;
-                    }
-
-                    // (0028,1051) Window Width
-                    if (tagGroup == 0x0028 && tagNumber == 0x1051)
-                    {
-                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
-                        var parts = buffer.Split('\\');
-                        float a = float.Parse(parts[0], nfi);
-
-                        windowWidth = a;
-                    }
-
-                    // (0020,1041) Slice Location
-                    if (tagGroup == 0x0020 && tagNumber == 0x1041)
-                    {
-                        string buffer = ReturnValues(bytes, i + ignore - length, i + ignore);
-                        var parts = buffer.Split('\\');
-                        float a = float.Parse(parts[0], nfi);
-
-                        sliceLocation = a;
-                    }
-
-                    // (7fe0,0010) Pixel Data
-                    if (tagGroup == 0x7fe0 && tagNumber == 0x0010)
-                    {
-                        i += ignore - length;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                for (i += 4; i < bytes.Length; i += ignore)
-                {
-                    tagGroup = (bytes[i + 1] << 8) + bytes[i];
-                    tagNumber = (bytes[i + 3] << 8) + bytes[i + 2];
-
-                    ignore = 6;
-
-                    string vr = "";
-                    vr += (char)bytes[i + 4];
-                    vr += (char)bytes[i + 5];
-
-                    if (valueReps.Contains(vr))
-                    {
-                        length = (bytes[i + 11] << 24) + (bytes[i + 10] << 16) + (bytes[i + 9] << 8) + bytes[i + 8];
-                        ignore += 4;
-                    }
-                    else
-                    {
-                        length = (bytes[i + 7] << 8) + bytes[i + 6];
-                    }
-                    ignore += 2 + length;
-
-                    // (7fe0,0010) Pixel Data
-                    if (tagGroup == 0x7fe0 && tagNumber == 0x0010)
-                    {
-                        i += ignore - length;
-                        break;
-                    }
-                }
-            }
-
             // Odczytywanie pikseli z plików
-            int j = 0, k = 0;
-            for (; i < bytes.Length; i += 2, k++)
+            int i = 0;
+            for (; i < bytes.Length; i += 2, l++)
             {
                 float color = (short)(((bytes[i + 1]) << 8) + bytes[i]) * rescaleSlope + rescaleIntercept;
                 float center = windowCenter - 0.5f;
@@ -295,41 +78,22 @@ namespace Project_DICOM
                 // Wzory z dokumentacji
                 if (color <= (center - range / 2.0f))
                 {
-                    pixelData[countFiles * width * height + j * width + k] = min;
+                    pixelData[l] = min;
                 }
                 else if (color > (center + range / 2.0f))
                 {
-                    pixelData[countFiles * width * height + j * width + k] = max;
+                    pixelData[l] = max;
                 }
                 else
                 {
-                    pixelData[countFiles * width * height + j * width + k] = ((color - center) / range + 0.5f) * (max - min) + min;
+                    pixelData[l] = ((color - center) / range + 0.5f) * (max - min) + min;
                 }
 
-                pixels[countFiles * width * height + j * width + k] = ((bytes[i + 1]) << 8) + bytes[i];
-                if (k == width)
-                {
-                    k = 0;
-                    j++;
-                }
+                pixels[l] = (short)(((bytes[i + 1]) << 8) + bytes[i]);
             }
         }
 
-        // Zwraca string z wartościami dla VR, które są w postaci stringów
-        public string ReturnValues(byte[] bytes, int start, int end)
-        {
-            char[] buffer = new char[end - start + 1];
-            int i = 0;
-            for (; bytes[start] != bytes[end]; start++)
-            {
-                buffer[i] = (char)bytes[start];
-                i++;
-            }
-
-            return new string(buffer);
-        }
-
-        public void SetColors()
+        public void SetColors(float rescaleSlope, float rescaleIntercept, float windowCenter, float windowWidth)
         {
             for (int i = 0; i < countFiles; i++)
             {
@@ -477,11 +241,11 @@ namespace Project_DICOM
         }
         public void DrawImages()
         {
-            if (countFiles == 0)
+            if (loaded == false)
             {
                 return;
             }
-            SetColors();
+            //SetColors(rescaleSlope1, rescaleIntercept1, windowCenter1, windowWidth1);
 
             if (view == "None")
             {
@@ -572,7 +336,7 @@ namespace Project_DICOM
                     }
                 }
 
-                if (view == "FirstHit")
+                /*if (view == "FirstHit")
                 {
                     for (int i = 0; i < countFiles; i++)
                     {
@@ -600,7 +364,7 @@ namespace Project_DICOM
                             }
                         }
                     }
-                }
+                }*/
 
                 DrawImage1(pixels1);
                 DrawImage2(pixels2);
@@ -657,7 +421,7 @@ namespace Project_DICOM
 
         private void OnLeftClick1(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            float spacing = pixelSpacing[0];
+            float spacing = 0.447266f;
             double distance;
             if (line1.Visibility == Visibility.Visible && label1.Visibility == Visibility.Visible)
             {
@@ -695,7 +459,7 @@ namespace Project_DICOM
 
         private void OnLeftClick2(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            float spacing = pixelSpacing[1];
+            float spacing = 0.447266f;
             double scale = countFiles / 100.0;
             double distance;
 
@@ -735,7 +499,7 @@ namespace Project_DICOM
 
         private void OnLeftClick3(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            float spacing = pixelSpacing[0];
+            float spacing = 0.625f;
             double scale = countFiles / 100.0;
             double distance;
 
@@ -800,8 +564,8 @@ namespace Project_DICOM
                 spot3.X2 = point.Y + 2;
                 spot3.Y2 = 512;
 
-                slider2.Value = (int)slider1.Value * 512.0 / 112.0;
-                slider3.Value = (int)slider1.Value * 512.0 / 112.0;
+                slider2.Value = (int)slider1.Value * 512.0 / 247.0;
+                slider3.Value = (int)slider1.Value * 512.0 / 247.0;
 
                 spot1.Visibility = Visibility.Visible;
                 spot2.Visibility = Visibility.Visible;
@@ -836,7 +600,7 @@ namespace Project_DICOM
                 spot3.X2 = 512;
                 spot3.Y2 = point.Y + 2;
 
-                slider1.Value = (int)slider2.Value * 112.0 / 512.0;
+                slider1.Value = (int)slider2.Value * 247.0 / 512.0;
                 slider3.Value = slider2.Value;
 
                 spot1.Visibility = Visibility.Visible;
@@ -872,7 +636,7 @@ namespace Project_DICOM
                 spot3.X2 = point.X + 2;
                 spot3.Y2 = point.Y + 2;
 
-                slider1.Value = (int)slider3.Value * 112.0 / 512.0;
+                slider1.Value = (int)slider3.Value * 247.0 / 512.0;
                 slider2.Value = slider3.Value;
 
                 spot1.Visibility = Visibility.Visible;
@@ -899,18 +663,30 @@ namespace Project_DICOM
             }
         }
 
-        private void OnTextBox(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void OnTextBox1(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            if (int.TryParse(textBox.Text, out int val) == false)
+            if (int.TryParse(textBox1.Text, out int val) == false)
             {
                 return;
             }
-            hits = val;
+            hits1 = val;
             if (view == "FirstHit")
             {
                 DrawImages();
             }
+        }
 
+        private void OnTextBox2(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (int.TryParse(textBox2.Text, out int val) == false)
+            {
+                return;
+            }
+            hits2 = val;
+            if (view == "FirstHit")
+            {
+                DrawImages();
+            }
         }
 
         private void OnSlideTransparent(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -920,42 +696,36 @@ namespace Project_DICOM
 
         private void OnPickFolder(object sender, RoutedEventArgs e)
         {
-            string directory = "";
-            var fbd = new FolderBrowserDialog();
-            byte[] fileBytes;
-            fbd.SelectedPath = @"D:\infa_studia\10semestr\WZI\head-dicom\";
-            DialogResult result = fbd.ShowDialog();
+            string file1;
+            string file2;
+            var ofd = new OpenFileDialog();
+            byte[] fileBytes1;
+            byte[] fileBytes2;
+            ofd.InitialDirectory = @"D:\infa_studia\10semestr\WZI\dane_zad2\";
+            ofd.Multiselect = true;
+            DialogResult result = ofd.ShowDialog();
 
-            if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+
+            if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(ofd.FileName) && ofd.FileNames.Length == 2)
             {
-                directory = fbd.SelectedPath;
+                file1 = ofd.FileNames[0];
+                file2 = ofd.FileNames[1];
             }
             else
             {
                 return;
             }
 
-            IEnumerable<string> files = Directory.EnumerateFiles(directory);
-            List<string> lof = new List<string>(files);
+            pixelData = new float[2 * countFiles * width * height];
+            pixels = new float[2 * countFiles * width * height];
 
-            // Sortowanie plików według liczb na końcu ścieżki
-            lof.Sort((s1, s2) => Int32.Parse(Regex.Match(s1, @"(\d+)(?!.*\d)").Value).
-                CompareTo(Int32.Parse(Regex.Match(s2, @"(\d+)(?!.*\d)").Value)));
+            fileBytes1 = File.ReadAllBytes(file1);
+            fileBytes2 = File.ReadAllBytes(file2);
 
-            countFiles = 0;
-            int allFiles = files.Count();
-            if (allFiles < 1) return;
-
-            pixelData = new float[allFiles * width * height];
-            pixels = new float[allFiles * width * height];
-
-            foreach (string file in lof)
-            {
-                fileBytes = File.ReadAllBytes(file);
-
-                LoadFile(fileBytes);
-                countFiles += 1;
-            }
+            LoadFile(fileBytes2, rescaleSlope2, rescaleIntercept2, windowCenter2, windowWidth2);
+            LoadFile(fileBytes1, rescaleSlope1, rescaleIntercept1, windowCenter1, windowWidth1);
+            
+            loaded = true;
 
             SetSliders();
             DrawImages();

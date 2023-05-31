@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1570">
     <Grid Margin="1" Background="LightSlateGray">
-        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="629,614,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
+        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="623,614,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
         <Border Margin="5,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Grid x:Name="grid1" MouseLeftButtonDown="OnLeftClick1" MouseRightButtonDown="OnRightClick1">
                 <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512" />
@@ -47,24 +47,26 @@
                 <ScaleTransform ScaleY="2"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Slider x:Name="sliderLevel" HorizontalAlignment="Left" Margin="65,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideLevel" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-200" Maximum="200" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True">
+        <Slider x:Name="sliderLevel" HorizontalAlignment="Left" Margin="59,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideLevel" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-200" Maximum="200" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2.5"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Slider x:Name="sliderWidth" HorizontalAlignment="Left" Margin="977,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideWidth" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-200" Maximum="200" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True">
+        <Slider x:Name="sliderWidth" HorizontalAlignment="Left" Margin="983,680,0,0" VerticalAlignment="Top" Width="512" ValueChanged="OnSlideWidth" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="-200" Maximum="200" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="2.5"/>
             </Slider.LayoutTransform>
         </Slider>
-        <Label Content="Window Level (Center) - Jasność" HorizontalAlignment="Left" Margin="166,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
-        <Label Content="Window Width (Range) - Kontrast" HorizontalAlignment="Left" Margin="1078,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
-        <ComboBox x:Name="comboBox" Margin="612,720,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="126" SelectionChanged="OnComboBox"/>
-        <Label Content="Widok" FontSize="16" HorizontalAlignment="Left" Margin="645,685,0,0" VerticalAlignment="Top" Height="30" Width="62" HorizontalContentAlignment="Center"/>
-        <Label Content="Przezroczystość" FontSize="16" HorizontalAlignment="Left" Margin="825,603,0,0" VerticalAlignment="Top" Height="30" Width="129" HorizontalContentAlignment="Center"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="20" Margin="765,720,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="38" HorizontalContentAlignment="Center" TextChanged="OnTextBox"/>
-        <Label Content="First Hit" FontSize="13" HorizontalAlignment="Left" Margin="755,691,0,0" VerticalAlignment="Top" Height="24" Width="56" HorizontalContentAlignment="Center"/>
-        <Slider x:Name="sliderTransparent" HorizontalAlignment="Left" Margin="873,636,0,0" VerticalAlignment="Top" Width="27" ValueChanged="OnSlideTransparent" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="0" Maximum="100" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True" Orientation="Vertical" Height="76">
+        <Label Content="Window Level (Center) - Jasność" HorizontalAlignment="Left" Margin="160,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
+        <Label Content="Window Width (Range) - Kontrast" HorizontalAlignment="Left" Margin="1084,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
+        <ComboBox x:Name="comboBox" Margin="606,720,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="126" SelectionChanged="OnComboBox"/>
+        <Label Content="Widok" FontSize="16" HorizontalAlignment="Left" Margin="639,685,0,0" VerticalAlignment="Top" Height="30" Width="62" HorizontalContentAlignment="Center"/>
+        <Label Content="Przezroczystość" FontSize="16" HorizontalAlignment="Left" Margin="849,604,0,0" VerticalAlignment="Top" Height="30" Width="129" HorizontalContentAlignment="Center"/>
+        <TextBox x:Name="textBox1" HorizontalAlignment="Left" Height="20" Margin="747,720,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="38" HorizontalContentAlignment="Center" TextChanged="OnTextBox1"/>
+        <Label Content="First Hit1" FontSize="13" HorizontalAlignment="Left" Margin="735,691,0,0" VerticalAlignment="Top" Height="24" Width="61" HorizontalContentAlignment="Center"/>
+        <TextBox x:Name="textBox2" HorizontalAlignment="Left" Height="20" Margin="809,720,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="38" HorizontalContentAlignment="Center" TextChanged="OnTextBox2"/>
+        <Label Content="First Hit2" FontSize="13" HorizontalAlignment="Left" Margin="799,691,0,0" VerticalAlignment="Top" Height="24" Width="61" HorizontalContentAlignment="Center"/>
+        <Slider x:Name="sliderTransparent" HorizontalAlignment="Left" Margin="897,637,0,0" VerticalAlignment="Top" Width="27" ValueChanged="OnSlideTransparent" IsSnapToTickEnabled="True" TickFrequency="10" Value="0" Minimum="0" Maximum="100" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" TickPlacement="BottomRight" IsMoveToPointEnabled="True" Orientation="Vertical" Height="76">
             <Slider.LayoutTransform>
                 <ScaleTransform ScaleY="1.5"/>
             </Slider.LayoutTransform>
