@@ -22,17 +22,18 @@ namespace Project_DICOM
         int width = 512, height = 512;
         int countFiles = 247;
         float[] pixels;
+
         bool loaded = false;
+        bool isView = false;
 
         string view = "None";
-        int isView = 0;
         int hits1 = 0;
         int hits2 = 0;
 
-        int l = 0;
-
         // (7fe0,0010) Pixel Data
-        public float[] pixelData;
+        public float[] pixelData1;
+        public float[] pixelData2;
+        public float[] pixelData3;
 
         // (0028,1053) Rescale Slope
         public float rescaleSlope1 = 1;
@@ -63,10 +64,10 @@ namespace Project_DICOM
             comboBox.SelectedItem = "None";
         }
 
-        public void LoadFile(byte[] bytes, float rescaleSlope, float rescaleIntercept, float windowCenter, float windowWidth)
+        public void LoadFile(float[] pixelDataTmp, byte[] bytes, float rescaleSlope, float rescaleIntercept, float windowCenter, float windowWidth)
         {
             // Odczytywanie pikseli z plików
-            int i = 0;
+            int i = 0, l = 0;
             for (; i < bytes.Length; i += 2, l++)
             {
                 float color = (short)(((bytes[i + 1]) << 8) + bytes[i]) * rescaleSlope + rescaleIntercept;
@@ -78,22 +79,22 @@ namespace Project_DICOM
                 // Wzory z dokumentacji
                 if (color <= (center - range / 2.0f))
                 {
-                    pixelData[l] = min;
+                    pixelDataTmp[l] = min;
                 }
                 else if (color > (center + range / 2.0f))
                 {
-                    pixelData[l] = max;
+                    pixelDataTmp[l] = max;
                 }
                 else
                 {
-                    pixelData[l] = ((color - center) / range + 0.5f) * (max - min) + min;
+                    pixelDataTmp[l] = ((color - center) / range + 0.5f) * (max - min) + min;
                 }
 
                 pixels[l] = (short)(((bytes[i + 1]) << 8) + bytes[i]);
             }
         }
 
-        public void SetColors(float rescaleSlope, float rescaleIntercept, float windowCenter, float windowWidth)
+        public void SetColors(float[] pixelDataTmp, float rescaleSlope, float rescaleIntercept, float windowCenter, float windowWidth)
         {
             for (int i = 0; i < countFiles; i++)
             {
@@ -110,15 +111,15 @@ namespace Project_DICOM
                         // Wzory z dokumentacji
                         if (color <= (center - range / 2.0f))
                         {
-                            pixelData[i * width * height + j * width + k] = min;
+                            pixelDataTmp[i * width * height + j * width + k] = min;
                         }
                         else if (color > (center + range / 2.0f))
                         {
-                            pixelData[i * width * height + j * width + k] = max;
+                            pixelDataTmp[i * width * height + j * width + k] = max;
                         }
                         else
                         {
-                            pixelData[i * width * height + j * width + k] = ((color - center) / range + 0.5f) * (max - min) + min;
+                            pixelDataTmp[i * width * height + j * width + k] = ((color - center) / range + 0.5f) * (max - min) + min;
                         }
                     }
                 }
@@ -142,7 +143,7 @@ namespace Project_DICOM
             int sliderValue = (int)slider1.Value;
             bitMap1 = new byte[stride * height];
 
-            if (isView == 0)
+            if (isView == false)
             {
                 Parallel.For(0, width, i =>
                 {
@@ -176,7 +177,7 @@ namespace Project_DICOM
             int sliderValue = (int)slider2.Value;
             bitMap2 = new byte[stride * height];
 
-            if (isView == 0)
+            if (isView == false)
             {
                 Parallel.For(0, countFiles, i =>
                 {
@@ -211,7 +212,7 @@ namespace Project_DICOM
             int sliderValue = (int)slider3.Value;
             bitMap3 = new byte[stride * height];
 
-            if (isView == 0)
+            if (isView == false)
             {
                 Parallel.For(0, countFiles, i =>
                 {
@@ -249,37 +250,58 @@ namespace Project_DICOM
 
             if (view == "None")
             {
-                isView = 0;
-                DrawImage1(pixelData);
-                DrawImage2(pixelData);
-                DrawImage3(pixelData);
+                isView = false;
+
+                for(int i = 0; i < countFiles * width * height; i++)
+                {
+                    pixelData3[i] = (float)sliderTransparent.Value * pixelData1[i] + (1 - (float)sliderTransparent.Value) * pixelData2[i];
+                }
+
+                DrawImage1(pixelData3);
+                DrawImage2(pixelData3);
+                DrawImage3(pixelData3);
             }
             else
             {
                 float[] pixels1 = new float[width * height];
                 float[] pixels2 = new float[width * countFiles];
                 float[] pixels3 = new float[height * countFiles];
+                float[] pixels4 = new float[width * height];
+                float[] pixels5 = new float[width * countFiles];
+                float[] pixels6 = new float[height * countFiles];
+                float[] pixelsOut1 = new float[width * height];
+                float[] pixelsOut2 = new float[width * countFiles];
+                float[] pixelsOut3 = new float[height * countFiles];
                 bool[] firstHit1 = new bool[width * height];
                 bool[] firstHit2 = new bool[width * countFiles];
                 bool[] firstHit3 = new bool[height * countFiles];
+                bool[] firstHit4 = new bool[width * height];
+                bool[] firstHit5 = new bool[width * countFiles];
+                bool[] firstHit6 = new bool[height * countFiles];
 
-                isView = 1;
+                isView = true;
                 for (int i = 0; i < width; i++)
                 {
                     for (int j = 0; j < height; j++)
                     {
                         pixels1[i * height + j] = 0;
                         firstHit1[i * height + j] = false;
+                        pixels4[i * height + j] = 0;
+                        firstHit4[i * height + j] = false;
                     }
                     for (int j = 0; j < countFiles; j++)
                     {
                         pixels2[i * countFiles + j] = 0;
                         firstHit2[i * countFiles + j] = false;
+                        pixels5[i * countFiles + j] = 0;
+                        firstHit5[i * countFiles + j] = false;
                     }
                     for (int j = 0; j < countFiles; j++)
                     {
                         pixels3[i * countFiles + j] = 0;
                         firstHit3[i * countFiles + j] = false;
+                        pixels6[i * countFiles + j] = 0;
+                        firstHit6[i * countFiles + j] = false;
                     }
                 }
 
@@ -291,9 +313,13 @@ namespace Project_DICOM
                         {
                             for (int k = 0; k < height; k++)
                             {
-                                pixels1[j * height + k] = Math.Max(pixels1[j * height + k], pixelData[i * width * height + j * width + k]);
-                                pixels2[k * countFiles + i] = Math.Max(pixels2[k * countFiles + i], pixelData[i * width * height + j * width + k]);
-                                pixels3[j * countFiles + i] = Math.Max(pixels3[j * countFiles + i], pixelData[i * width * height + j * width + k]);
+                                pixels1[j * height + k] = Math.Max(pixels1[j * height + k], pixelData1[i * width * height + j * width + k]);
+                                pixels2[k * countFiles + i] = Math.Max(pixels2[k * countFiles + i], pixelData1[i * width * height + j * width + k]);
+                                pixels3[j * countFiles + i] = Math.Max(pixels3[j * countFiles + i], pixelData1[i * width * height + j * width + k]);
+
+                                pixels4[j * height + k] = Math.Max(pixels4[j * height + k], pixelData2[i * width * height + j * width + k]);
+                                pixels5[k * countFiles + i] = Math.Max(pixels5[k * countFiles + i], pixelData2[i * width * height + j * width + k]);
+                                pixels6[j * countFiles + i] = Math.Max(pixels6[j * countFiles + i], pixelData2[i * width * height + j * width + k]);
                             }
                         }
                     }
@@ -307,9 +333,13 @@ namespace Project_DICOM
                         {
                             for (int k = 0; k < height; k++)
                             {
-                                pixels1[j * height + k] = pixels1[j * height + k] + pixelData[i * width * height + j * width + k];
-                                pixels2[k * countFiles + i] = pixels2[k * countFiles + i] + pixelData[i * width * height + j * width + k];
-                                pixels3[j * countFiles + i] = pixels3[j * countFiles + i] + pixelData[i * width * height + j * width + k];
+                                pixels1[j * height + k] = pixels1[j * height + k] + pixelData1[i * width * height + j * width + k];
+                                pixels2[k * countFiles + i] = pixels2[k * countFiles + i] + pixelData1[i * width * height + j * width + k];
+                                pixels3[j * countFiles + i] = pixels3[j * countFiles + i] + pixelData1[i * width * height + j * width + k];
+
+                                pixels4[j * height + k] = pixels4[j * height + k] + pixelData2[i * width * height + j * width + k];
+                                pixels5[k * countFiles + i] = pixels5[k * countFiles + i] + pixelData2[i * width * height + j * width + k];
+                                pixels6[j * countFiles + i] = pixels6[j * countFiles + i] + pixelData2[i * width * height + j * width + k];
                             }
                         }
                     }
@@ -318,6 +348,7 @@ namespace Project_DICOM
                         for (int j = 0; j < height; j++)
                         {
                             pixels1[i * height + j] = pixels1[i * height + j] / countFiles;
+                            pixels4[i * height + j] = pixels4[i * height + j] / countFiles;
                         }
                     }
                     for (int i = 0; i < countFiles; i++)
@@ -325,6 +356,7 @@ namespace Project_DICOM
                         for (int j = 0; j < width; j++)
                         {
                             pixels2[j * countFiles + i] = pixels2[j * countFiles + i] / width;
+                            pixels5[j * countFiles + i] = pixels5[j * countFiles + i] / width;
                         }
                     }
                     for (int i = 0; i < countFiles; i++)
@@ -332,11 +364,12 @@ namespace Project_DICOM
                         for (int j = 0; j < height; j++)
                         {
                             pixels3[j * countFiles + i] = pixels3[j * countFiles + i] / height;
+                            pixels6[j * countFiles + i] = pixels6[j * countFiles + i] / height;
                         }
                     }
                 }
 
-                /*if (view == "FirstHit")
+                if (view == "FirstHit")
                 {
                     for (int i = 0; i < countFiles; i++)
                     {
@@ -344,31 +377,59 @@ namespace Project_DICOM
                         {
                             for (int k = 0; k < height; k++)
                             {
-                                if (!firstHit1[j * height + k] && hits < pixelData[i * width * height + j * width + k])
+                                if (!firstHit1[j * height + k] && hits1 < pixelData1[i * width * height + j * width + k])
                                 {
-                                    pixels1[j * height + k] = pixelData[i * width * height + j * width + k];
+                                    pixels1[j * height + k] = pixelData1[i * width * height + j * width + k];
                                     firstHit1[j * height + k] = true;
                                 }
-
-                                if (!firstHit2[k * countFiles + i] && hits < pixelData[i * width * height + j * width + k])
+                                if (!firstHit4[j * height + k] && hits2 < pixelData2[i * width * height + j * width + k])
                                 {
-                                    pixels2[k * countFiles + i] = pixelData[i * width * height + j * width + k];
-                                    firstHit2[k * countFiles + i] = true;
+                                    pixels4[j * height + k] = pixelData2[i * width * height + j * width + k];
+                                    firstHit4[j * height + k] = true;
                                 }
 
-                                if (!firstHit3[j * countFiles + i] && hits < pixelData[i * width * height + j * width + k])
+                                if (!firstHit2[k * countFiles + i] && hits1 < pixelData1[i * width * height + j * width + k])
                                 {
-                                    pixels3[j * countFiles + i] = pixelData[i * width * height + j * width + k];
+                                    pixels2[k * countFiles + i] = pixelData1[i * width * height + j * width + k];
+                                    firstHit2[k * countFiles + i] = true;
+                                }
+                                if (!firstHit5[k * countFiles + i] && hits2 < pixelData2[i * width * height + j * width + k])
+                                {
+                                    pixels5[k * countFiles + i] = pixelData2[i * width * height + j * width + k];
+                                    firstHit5[k * countFiles + i] = true;
+                                }
+
+                                if (!firstHit3[j * countFiles + i] && hits1 < pixelData1[i * width * height + j * width + k])
+                                {
+                                    pixels3[j * countFiles + i] = pixelData1[i * width * height + j * width + k];
                                     firstHit3[j * countFiles + i] = true;
+                                }
+                                if (!firstHit6[j * countFiles + i] && hits2 < pixelData2[i * width * height + j * width + k])
+                                {
+                                    pixels6[j * countFiles + i] = pixelData2[i * width * height + j * width + k];
+                                    firstHit6[j * countFiles + i] = true;
                                 }
                             }
                         }
                     }
-                }*/
+                }
 
-                DrawImage1(pixels1);
-                DrawImage2(pixels2);
-                DrawImage3(pixels3);
+                for (int i = 0; i < width * height; i++)
+                {
+                    pixelsOut1[i] = (float)sliderTransparent.Value * pixels1[i] + (1 - (float)sliderTransparent.Value) * pixels4[i];
+                }
+                for (int i = 0; i < width * countFiles; i++)
+                {
+                    pixelsOut2[i] = (float)sliderTransparent.Value * pixels2[i] + (1 - (float)sliderTransparent.Value) * pixels5[i];
+                }
+                for (int i = 0; i < height * countFiles; i++)
+                {
+                    pixelsOut3[i] = (float)sliderTransparent.Value * pixels3[i] + (1 - (float)sliderTransparent.Value) * pixels6[i];
+                }
+
+                DrawImage1(pixelsOut1);
+                DrawImage2(pixelsOut2);
+                DrawImage3(pixelsOut3);
             }
         }
 
@@ -381,31 +442,31 @@ namespace Project_DICOM
 
         private void OnSlide1(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (countFiles > 0)
+            if (loaded)
             {
-                DrawImage1(pixelData);
+                DrawImage1(pixelData3);
             }
         }
 
         private void OnSlide2(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (countFiles > 0)
+            if (loaded)
             {
-                DrawImage2(pixelData);
+                DrawImage2(pixelData3);
             }
         }
 
         private void OnSlide3(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (countFiles > 0)
+            if (loaded)
             {
-                DrawImage3(pixelData);
+                DrawImage3(pixelData3);
             }
         }
 
         private void OnSlideLevel(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (countFiles > 0)
+            if (loaded)
             {
                 DrawImages();
             }
@@ -413,7 +474,15 @@ namespace Project_DICOM
 
         private void OnSlideWidth(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (countFiles > 0)
+            if (loaded)
+            {
+                DrawImages();
+            }
+        }
+
+        private void OnSlideTransparent(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (loaded)
             {
                 DrawImages();
             }
@@ -689,11 +758,6 @@ namespace Project_DICOM
             }
         }
 
-        private void OnSlideTransparent(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-
-        }
-
         private void OnPickFolder(object sender, RoutedEventArgs e)
         {
             string file1;
@@ -716,14 +780,16 @@ namespace Project_DICOM
                 return;
             }
 
-            pixelData = new float[2 * countFiles * width * height];
-            pixels = new float[2 * countFiles * width * height];
+            pixelData1 = new float[countFiles * width * height];
+            pixelData2 = new float[countFiles * width * height];
+            pixelData3 = new float[countFiles * width * height];
+            pixels = new float[countFiles * width * height];
 
             fileBytes1 = File.ReadAllBytes(file1);
             fileBytes2 = File.ReadAllBytes(file2);
 
-            LoadFile(fileBytes2, rescaleSlope2, rescaleIntercept2, windowCenter2, windowWidth2);
-            LoadFile(fileBytes1, rescaleSlope1, rescaleIntercept1, windowCenter1, windowWidth1);
+            LoadFile(pixelData1, fileBytes1, rescaleSlope1, rescaleIntercept1, windowCenter1, windowWidth1);
+            LoadFile(pixelData2, fileBytes2, rescaleSlope2, rescaleIntercept2, windowCenter2, windowWidth2);
             
             loaded = true;
 
