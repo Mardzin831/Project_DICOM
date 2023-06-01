@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1570">
     <Grid Margin="1" Background="LightSlateGray">
-        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="623,614,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
+        <Button Content="Wybierz folder" HorizontalAlignment="Left" Margin="613,614,0,0" VerticalAlignment="Top" Width="150" Height="40" Click="OnPickFolder" Background="GreenYellow" FontSize="15"/>
         <Border Margin="5,5,0,0" Height="512" Width="512" BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Grid x:Name="grid1" MouseLeftButtonDown="OnLeftClick1" MouseRightButtonDown="OnRightClick1">
                 <Image x:Name="Image1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="512" Width="512" />
@@ -61,7 +61,7 @@
         <Label Content="Window Width (Range) - Kontrast" HorizontalAlignment="Left" Margin="1084,641,0,0" VerticalAlignment="Top" FontSize="20" Width="310" HorizontalContentAlignment="Center"/>
         <ComboBox x:Name="comboBox" Margin="606,720,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="126" SelectionChanged="OnComboBox"/>
         <Label Content="Widok" FontSize="16" HorizontalAlignment="Left" Margin="639,685,0,0" VerticalAlignment="Top" Height="30" Width="62" HorizontalContentAlignment="Center"/>
-        <Label Content="Przezroczystość" FontSize="16" HorizontalAlignment="Left" Margin="847,598,0,0" VerticalAlignment="Top" Height="34" Width="129" HorizontalContentAlignment="Center"/>
+        <Label Content="Przezroczystość" FontSize="16" HorizontalAlignment="Left" Margin="845,598,0,0" VerticalAlignment="Top" Height="34" Width="129" HorizontalContentAlignment="Center"/>
         <TextBox x:Name="textBox1" HorizontalAlignment="Left" Height="20" Margin="747,720,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="38" HorizontalContentAlignment="Center" TextChanged="OnTextBox1"/>
         <Label Content="First Hit1" FontSize="13" HorizontalAlignment="Left" Margin="735,691,0,0" VerticalAlignment="Top" Height="24" Width="61" HorizontalContentAlignment="Center"/>
         <TextBox x:Name="textBox2" HorizontalAlignment="Left" Height="20" Margin="809,720,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="38" HorizontalContentAlignment="Center" TextChanged="OnTextBox2"/>
